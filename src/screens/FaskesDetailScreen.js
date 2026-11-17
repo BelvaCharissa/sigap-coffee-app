@@ -140,7 +140,7 @@ export default function FaskesDetailScreen({ route, navigation }) {
           </View>
 
           {katalog.map((obat) => {
-            const stokInfo = ketersediaanObatService.getStok(faskes.id, obat.id);
+            const stokInfo = ketersediaanObatService.getStokFaskes(faskes.id, obat.id);
             const statusKey = stokInfo.status === 'Ada' ? 'success' : stokInfo.status === 'Habis' ? 'danger' : 'warning';
 
             return (
@@ -160,7 +160,7 @@ export default function FaskesDetailScreen({ route, navigation }) {
                   </View>
                 </View>
 
-                {stokInfo.adaKonflik ? (
+                {stokInfo.hasConflict ? (
                   <View style={styles.conflictNotice}>
                     <Ionicons name="alert" size={13} color="#D97706" />
                     <Text style={styles.conflictNoticeText}>Ada laporan stok berbeda dalam 24 jam terakhir</Text>
