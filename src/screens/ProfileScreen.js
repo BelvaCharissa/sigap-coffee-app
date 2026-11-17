@@ -270,6 +270,44 @@ export default function ProfileScreen({ navigation }) {
           )}
         </View>
 
+        {/* Konfigurasi Server & Akun */}
+        <View style={styles.cardBox}>
+          <View style={styles.cardBoxHeader}>
+            <Ionicons name="server-outline" size={18} color={colors.primary} />
+            <Text style={styles.cardBoxTitle}>Koneksi Server (Expo Go & STB)</Text>
+          </View>
+          <Text style={styles.cardBoxSub}>
+            URL Microservice aktif: {ApiService.getBaseUrl()}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+            <TouchableOpacity
+              style={[styles.testApiBtn, { flex: 1, backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('Login')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="log-in-outline" size={16} color="#FFFFFF" />
+              <Text style={styles.testApiBtnText}>Halaman Login (JWT)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.testApiBtn, { flex: 1, backgroundColor: '#0288D1' }]}
+              onPress={async () => {
+                const res = await ApiService.checkHealth();
+                Alert.alert(
+                  res.isLive ? 'Server Online!' : 'Mode Siaga Offline',
+                  res.isLive
+                    ? `Microservice terhubung (${res.data?.service}). Uptime: ${res.data?.uptimeSeconds}s.`
+                    : `Server ${ApiService.getBaseUrl()} belum terhubung via network. Sistem otomatis memakai cache mandiri.`
+                );
+              }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="pulse" size={16} color="#FFFFFF" />
+              <Text style={styles.testApiBtnText}>Cek Health Server</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Tim Penyusun */}
         <View style={styles.aboutCard}>
           <Text style={styles.aboutTitle}>SIGAP (Sehat, Informasi, Gerak, Akses, Pertolongan)</Text>

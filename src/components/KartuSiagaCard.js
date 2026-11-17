@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import Badge from './Badge';
 
-export default function KartuSiagaCard({ kartu, isCompact = false }) {
+export default function KartuSiagaCard({ kartu, isCompact = false, onPress }) {
   const [expanded, setExpanded] = useState(!isCompact);
 
   let urgencyType = 'Rumah';
@@ -24,8 +24,23 @@ export default function KartuSiagaCard({ kartu, isCompact = false }) {
     urgencyLabel = 'Kunjungi Puskesmas / Klinik';
   }
 
+  // Tanda bahaya format compatibility (bisa string atau array)
+  const tandaBahayaArray = Array.isArray(kartu.tandaBahaya)
+    ? kartu.tandaBahaya
+    : [kartu.tandaBahaya];
+
+  const tindakanAwalArray = Array.isArray(kartu.tindakanAwal)
+    ? kartu.tindakanAwal
+    : kartu.isiSingkat
+    ? [kartu.isiSingkat]
+    : [];
+
   return (
-    <View style={[styles.card, { borderLeftColor: urgencyColor, borderLeftWidth: 4 }]}>
+    <TouchableOpacity
+      style={[styles.card, { borderLeftColor: urgencyColor, borderLeftWidth: 4 }]}
+      onPress={onPress}
+      activeOpacity={onPress ? 0.85 : 1}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Badge label={urgencyLabel} type={urgencyType} size="small" />
@@ -51,7 +66,7 @@ export default function KartuSiagaCard({ kartu, isCompact = false }) {
             Tanda Bahaya yang Perlu Diwaspadai:
           </Text>
         </View>
-        {(expanded ? kartu.tandaBahaya : kartu.tandaBahaya.slice(0, 2)).map((item, idx) => (
+        {(expanded ? tandaBahayaArray : tandaBahayaArray.slice(0, 2)).map((item, idx) => (
           <View key={idx} style={styles.bulletRow}>
             <Text style={[styles.bullet, { color: urgencyColor }]}>•</Text>
             <Text style={styles.bulletText}>{item}</Text>
@@ -62,23 +77,25 @@ export default function KartuSiagaCard({ kartu, isCompact = false }) {
       {expanded && (
         <>
           {/* Tindakan Awal */}
-          <View style={styles.actionBox}>
-            <View style={styles.actionHeader}>
-              <Ionicons name="medkit-outline" size={15} color={colors.primary} />
-              <Text style={styles.actionTitle}>Pertolongan Awal Mandiri:</Text>
-            </View>
-            {kartu.tindakanAwal.map((item, idx) => (
-              <View key={idx} style={styles.bulletRow}>
-                <Text style={styles.greenBullet}>✓</Text>
-                <Text style={styles.actionText}>{item}</Text>
+          {tindakanAwalArray.length > 0 && (
+            <View style={styles.actionBox}>
+              <View style={styles.actionHeader}>
+                <Ionicons name="medkit-outline" size={15} color={colors.primary} />
+                <Text style={styles.actionTitle}>Pertolongan Awal Mandiri:</Text>
               </View>
-            ))}
-          </View>
+              {tindakanAwalArray.map((item, idx) => (
+                <View key={idx} style={styles.bulletRow}>
+                  <Text style={styles.greenBullet}>✓</Text>
+                  <Text style={styles.actionText}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Kapan ke Faskes */}
           <View style={styles.callout}>
             <Ionicons name="information-circle" size={16} color={colors.primary} />
-            <Text style={styles.calloutText}>{kartu.kapanKeFaskes}</Text>
+            <Text style={styles.calloutText}>{kartu.kapanKeFaskes || kartu.kapanHarusKeFaskes}</Text>
           </View>
 
           {/* Rujukan & Tanggal Tinjau (DDD Invariant Bab V.5) */}
@@ -97,7 +114,14 @@ export default function KartuSiagaCard({ kartu, isCompact = false }) {
           </View>
         </>
       )}
-    </View>
+
+      {onPress && (
+        <View style={styles.tapDetailHint}>
+          <Text style={styles.tapDetailText}>Ketuk untuk lihat detail edukasi & panduan lengkap</Text>
+          <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+        </View>
+      )}
+    </TouchableOpacity>
   );
 }
 
@@ -128,20 +152,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
-    lineHeight: 22,
     marginBottom: 10,
+    lineHeight: 22,
   },
   warningBox: {
-    backgroundColor: '#FFF9F7',
-    padding: 10,
+    backgroundColor: '#FFF9F5',
     borderRadius: 10,
+    padding: 10,
     marginBottom: 10,
   },
   warningHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginBottom: 5,
+    marginBottom: 6,
+    gap: 6,
   },
   warningTitle: {
     fontSize: 12,
@@ -150,65 +174,63 @@ const styles = StyleSheet.create({
   bulletRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginVertical: 2,
-    paddingRight: 10,
+    marginBottom: 3,
+    paddingLeft: 4,
   },
   bullet: {
     fontSize: 14,
     marginRight: 6,
     lineHeight: 18,
   },
-  greenBullet: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '700',
-    marginRight: 6,
-    lineHeight: 18,
-  },
   bulletText: {
     fontSize: 12,
-    color: '#4A2A20',
-    lineHeight: 18,
+    color: colors.text,
     flex: 1,
+    lineHeight: 17,
   },
   actionBox: {
     backgroundColor: colors.primarySubtle,
-    padding: 10,
     borderRadius: 10,
+    padding: 10,
     marginBottom: 10,
   },
   actionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginBottom: 5,
+    marginBottom: 6,
+    gap: 6,
   },
   actionTitle: {
     fontSize: 12,
     fontWeight: '700',
     color: colors.primary,
   },
+  greenBullet: {
+    color: colors.primary,
+    fontWeight: '700',
+    marginRight: 6,
+    fontSize: 12,
+  },
   actionText: {
     fontSize: 12,
     color: colors.text,
-    lineHeight: 18,
     flex: 1,
+    lineHeight: 17,
   },
   callout: {
     flexDirection: 'row',
-    backgroundColor: '#EBF6EE',
-    padding: 10,
-    borderRadius: 10,
-    gap: 8,
     alignItems: 'center',
+    backgroundColor: '#EEF6F2',
+    padding: 10,
+    borderRadius: 8,
     marginBottom: 10,
+    gap: 8,
   },
   calloutText: {
     fontSize: 12,
-    fontWeight: '600',
     color: colors.primary,
+    fontWeight: '600',
     flex: 1,
-    lineHeight: 17,
   },
   footer: {
     borderTopWidth: 1,
@@ -219,18 +241,28 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
   },
   footerText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: colors.textTertiary,
-    flex: 1,
   },
   disclaimerText: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: colors.textTertiary,
+    marginTop: 4,
     fontStyle: 'italic',
-    marginTop: 3,
-    lineHeight: 14,
+  },
+  tapDetailHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 8,
+    gap: 4,
+  },
+  tapDetailText: {
+    fontSize: 11,
+    color: colors.primary,
+    fontWeight: '600',
   },
 });

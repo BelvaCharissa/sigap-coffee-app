@@ -10,9 +10,17 @@
       "backgroundColor": "#EBF6EE"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "fun.stei.sigap"
     },
     "android": {
+      "package": "fun.stei.sigap",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#EBF6EE",
         "foregroundImage": "./assets/android-icon-foreground.png"

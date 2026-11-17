@@ -21,7 +21,7 @@ const urgencyTabs = [
   { key: 'IGD', label: '🚨 Gawat Darurat (IGD)' },
 ];
 
-export default function KartuSiagaScreen() {
+export default function KartuSiagaScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUrgency, setSelectedUrgency] = useState('Semua');
 
@@ -97,7 +97,13 @@ export default function KartuSiagaScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <KartuSiagaCard kartu={item} isCompact={false} />}
+        renderItem={({ item }) => (
+          <KartuSiagaCard
+            kartu={item}
+            isCompact={false}
+            onPress={() => navigation.navigate('KartuDetail', { kartu: item })}
+          />
+        )}
       />
     </SafeAreaView>
   );

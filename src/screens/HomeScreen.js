@@ -226,7 +226,12 @@ export default function HomeScreen({ navigation }) {
 
         <View style={styles.cardListContainer}>
           {kartuRekomendasi.slice(0, 2).map((k) => (
-            <KartuSiagaCard key={k.id} kartu={k} isCompact={false} />
+            <KartuSiagaCard
+              key={k.id}
+              kartu={k}
+              isCompact={false}
+              onPress={() => navigation.navigate('KartuDetail', { kartu: k })}
+            />
           ))}
         </View>
 
@@ -250,7 +255,7 @@ export default function HomeScreen({ navigation }) {
                 faskes={f}
                 stokInfo={stokInfo}
                 selectedObatName={selectedObat?.nama}
-                onPressDetail={() => handleOpenLapor(f)}
+                onPressDetail={() => navigation.navigate('FaskesDetail', { faskes: f })}
                 onPressRoute={() => {
                   navigation.navigate('Rute', { targetFaskes: f });
                 }}

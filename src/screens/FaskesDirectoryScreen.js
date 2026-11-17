@@ -154,8 +154,7 @@ export default function FaskesDirectoryScreen({ navigation }) {
               stokInfo={stokInfo}
               selectedObatName={selectedObat?.nama}
               onPressDetail={() => {
-                setSelectedFaskesForLapor(item);
-                setModalLaporVisible(true);
+                navigation.navigate('FaskesDetail', { faskes: item });
               }}
               onPressRoute={() => {
                 navigation.navigate('Rute', { targetFaskes: item });

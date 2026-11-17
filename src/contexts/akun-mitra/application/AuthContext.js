@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Peran } from '../domain/Peran';
 import { eventBus } from '../../../shared/EventBus';
+import ApiService from '../../../services/ApiService';
 
 const defaultUsers = {
   warga: {
@@ -43,6 +44,9 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(defaultUsers.warga);
+  const [authToken, setAuthToken] = useState('sigap_mock_jwt_token_2026');
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
   const [semuaKlaim, setSemuaKlaim] = useState([
     {
       id: 'klaim_1',
@@ -61,6 +65,42 @@ export function AuthProvider({ children }) {
       tanggal: '15 Nov 2026',
     },
   ]);
+
+  const login = async (email, password) => {
+    // Coba via ApiService
+    const res = await ApiService.login(email, password);
+    if (res.success && res.user) {
+      setCurrentUser(res.user);
+      setAuthToken(res.token || 'sigap_jwt_token');
+      setIsAuthenticated(true);
+      return res.user;
+    }
+    throw new Error(res.message || 'Login gagal.');
+  };
+
+  const register = async (userData) => {
+    const res = await ApiService.register(userData);
+    if (res.success && res.user) {
+      setCurrentUser(res.user);
+      setAuthToken(res.token || 'sigap_jwt_token');
+      setIsAuthenticated(true);
+      return res.user;
+    }
+    throw new Error(res.message || 'Registrasi gagal.');
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(defaultUsers.warga);
+    setAuthToken(null);
+  };
+
+  const loginAsDemo = (roleKey = 'warga') => {
+    const user = defaultUsers[roleKey] || defaultUsers.warga;
+    setCurrentUser(user);
+    setAuthToken('demo_token_' + roleKey);
+    setIsAuthenticated(true);
+  };
 
   const switchRole = (newRoleKey) => {
     if (defaultUsers[newRoleKey]) {
@@ -110,7 +150,7 @@ export function AuthProvider({ children }) {
 
   const tambahReputasi = (poin) => {
     setCurrentUser(prev => {
-      const newScore = Math.min(100, Math.max(0, prev.reputasi + poin));
+      const newScore = Math.min(100, Math.max(0, (prev.reputasi || 50) + poin));
       eventBus.publish('ReputasiBerubah', {
         userId: prev.id,
         reputasiBaru: newScore,
@@ -123,6 +163,12 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         currentUser,
+        authToken,
+        isAuthenticated,
+        login,
+        register,
+        logout,
+        loginAsDemo,
         switchRole,
         ajukanKlaim,
         setujuiKlaim,

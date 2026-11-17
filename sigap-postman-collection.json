@@ -1,0 +1,245 @@
+{
+  "info": {
+    "_postman_id": "c1f73650-74e9-4e78-98e1-5bc418a09fca",
+    "name": "SIGAP Microservice API Collection (TST x PWAM)",
+    "description": "Koleksi API Lengkap untuk Microservice SIGAP. Mendukung pengujian lokal (localhost:8080/api) dan Cloudflare Tunnel (sigap.stei.fun/api).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "SIGAP-PARTNER-ACCESS-KEY-2026",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "2. Auth - Login Warga",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.token) {",
+              "    pm.collectionVariables.set('authToken', jsonData.token);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"indah@sigap.itb.ac.id\",\n  \"password\": \"sigap123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "3. Auth - Login Mitra Faskes",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"mitra.kimiafarma@sigap.itb.ac.id\",\n  \"password\": \"sigap123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "4. Direktori - List Faskes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/faskes?kategori=Semua",
+          "host": ["{{baseUrl}}"],
+          "path": ["faskes"],
+          "query": [{ "key": "kategori", "value": "Semua" }]
+        }
+      }
+    },
+    {
+      "name": "5. Obat - List Katalog",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/obat",
+          "host": ["{{baseUrl}}"],
+          "path": ["obat"]
+        }
+      }
+    },
+    {
+      "name": "6. Stok - Cek Ketersediaan Obat",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/stok?faskesId=faskes_1&obatId=obat_1",
+          "host": ["{{baseUrl}}"],
+          "path": ["stok"],
+          "query": [
+            { "key": "faskesId", "value": "faskes_1" },
+            { "key": "obatId", "value": "obat_1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Stok - Laporkan Stok (Warga / Mitra)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"faskesId\": \"faskes_1\",\n  \"obatId\": \"obat_1\",\n  \"status\": \"Ada\",\n  \"catatan\": \"Stok baru datang 20 botol tadi pagi\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/stok/lapor",
+          "host": ["{{baseUrl}}"],
+          "path": ["stok", "lapor"]
+        }
+      }
+    },
+    {
+      "name": "8. Kondisi Jalan - Snapshot Cuaca Live",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/kondisi-jalan/cuaca?lat=-6.89&lng=107.61",
+          "host": ["{{baseUrl}}"],
+          "path": ["kondisi-jalan", "cuaca"]
+        }
+      }
+    },
+    {
+      "name": "9. Kondisi Jalan - List Bahaya Jalan",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/kondisi-jalan/bahaya",
+          "host": ["{{baseUrl}}"],
+          "path": ["kondisi-jalan", "bahaya"]
+        }
+      }
+    },
+    {
+      "name": "10. Rute Aman - Hitung Opsi Tercepat & Teraman",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"faskesId\": \"faskes_1\",\n  \"userLat\": -6.8915,\n  \"userLng\": 107.6107\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rute-aman/hitung",
+          "host": ["{{baseUrl}}"],
+          "path": ["rute-aman", "hitung"]
+        }
+      }
+    },
+    {
+      "name": "11. Panduan Siaga - List Kartu Edukasi",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/kartu-siaga?q=demam&urgensi=Semua",
+          "host": ["{{baseUrl}}"],
+          "path": ["kartu-siaga"],
+          "query": [
+            { "key": "q", "value": "demam" },
+            { "key": "urgensi", "value": "Semua" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "12. Kelompok Lain - Public Faskes (X-API-Key)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{apiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/public/faskes",
+          "host": ["{{baseUrl}}"],
+          "path": ["public", "faskes"]
+        }
+      }
+    },
+    {
+      "name": "13. Integrasi Peer - JalanAman",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/peer/jalanaman",
+          "host": ["{{baseUrl}}"],
+          "path": ["peer", "jalanaman"]
+        }
+      }
+    },
+    {
+      "name": "14. Integrasi Peer - SehatDekat",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/peer/sehatdekat",
+          "host": ["{{baseUrl}}"],
+          "path": ["peer", "sehatdekat"]
+        }
+      }
+    }
+  ]
+}

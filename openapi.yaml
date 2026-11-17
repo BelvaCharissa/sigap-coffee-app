@@ -1,0 +1,529 @@
+openapi: 3.0.3
+info:
+  title: SIGAP Microservice Core API
+  description: |
+    API Resmi Layanan SIGAP (Sehat, Informasi, Gerak, Akses, Pertolongan).
+    Tugas Besar II3160 Teknologi Sistem Terintegrasi (TST) & II3140 Pengembangan Aplikasi Web & Mobile (PWAM).
+    Institut Teknologi Bandung 2026.
+    
+    Tim:
+    - Indah Ramadhani (18224037) - Backend & Bisnis (TST)
+    - Belva Charissa P H (18224051) - Mobile Developer (PWAM)
+  version: 1.0.0
+servers:
+  - url: https://sigap.stei.fun/api
+    description: Production STB Gateway (via Cloudflare Tunnel K01)
+  - url: http://localhost:8080/api
+    description: Local Gateway (Nginx Reverse Proxy)
+  - url: http://localhost:3000/api
+    description: Direct Core Service (Local Node.js)
+
+tags:
+  - name: Health
+    description: Service health check
+  - name: Auth & Mitra
+    description: Generic Subdomain - Autentikasi Pengguna & Klaim Faskes
+  - name: Direktori Faskes
+    description: Supporting Subdomain - Manajemen Data Fasilitas Kesehatan (OSM / Manual)
+  - name: Ketersediaan Obat
+    description: Core Subdomain - Laporan Stok & Perhitungan Status Ketersediaan
+  - name: Kondisi Jalan
+    description: Supporting Subdomain - Cuaca Ekstrem (Open-Meteo) & Laporan Bahaya Jalan
+  - name: Rute Aman
+    description: Core Subdomain - Penilaian Rute Tercepat vs Teraman
+  - name: Panduan Siaga
+    description: Supporting Subdomain - Edukasi & Triage Kartu Siaga
+  - name: Inter-Group Public
+    description: Endpoint Terbuka untuk Integrasi Kelompok Lain via X-API-Key
+  - name: Peer Integrations
+    description: Integrasi Konsumsi API Kelompok Lain (JalanAman & SehatDekat)
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT untuk pengguna aplikasi mobile yang sudah login.
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key untuk komunikasi antar microservice kelompok lain.
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: sigap-core
+        version:
+          type: string
+          example: 1.0.0
+        timestamp:
+          type: string
+          example: '2026-11-17T05:30:00.000Z'
+        uptime:
+          type: number
+          example: 124.5
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Unauthorized access or validation error.
+        error:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usr_warga_1
+        nama:
+          type: string
+          example: Indah Ramadhani
+        email:
+          type: string
+          example: indah@sigap.itb.ac.id
+        role:
+          type: string
+          enum: [Warga, Mitra, Admin]
+          example: Warga
+        nim:
+          type: string
+          example: '18224037'
+        reputasi:
+          type: integer
+          example: 85
+
+    Faskes:
+      type: object
+      properties:
+        id:
+          type: string
+          example: faskes_1
+        nama:
+          type: string
+          example: Apotek Kimia Farma Dago
+        jenis:
+          type: string
+          enum: [Apotek, Klinik, Puskesmas, Rumah Sakit]
+          example: Apotek
+        alamat:
+          type: string
+          example: Jl. Ir. H. Juanda No. 69, Dago, Bandung
+        lat:
+          type: number
+          example: -6.8924
+        lng:
+          type: number
+          example: 107.6105
+        telepon:
+          type: string
+          example: '022-2500123'
+        jamBuka:
+          type: string
+          example: 24 Jam
+        sumberData:
+          type: string
+          enum: [OSM, Manual]
+          example: OSM
+        isClaimed:
+          type: boolean
+          example: true
+        pemilikId:
+          type: string
+          example: usr_mitra_1
+
+    LaporanStokInput:
+      type: object
+      required:
+        - faskesId
+        - obatId
+        - status
+      properties:
+        faskesId:
+          type: string
+          example: faskes_1
+        obatId:
+          type: string
+          example: obat_1
+        status:
+          type: string
+          enum: [Ada, Habis, Tidak Yakin]
+          example: Ada
+        catatan:
+          type: string
+          example: Stok sirup baru tiba 12 botol tadi siang
+
+    BahayaJalanInput:
+      type: object
+      required:
+        - jenis
+        - lokasi
+        - lat
+        - lng
+      properties:
+        jenis:
+          type: string
+          enum: [Banjir, Longsor, Jalan Rusak]
+          example: Banjir
+        lokasi:
+          type: string
+          example: Jl. Pasteur depan BTC Mall
+        lat:
+          type: number
+          example: -6.8992
+        lng:
+          type: number
+          example: 107.5901
+        deskripsi:
+          type: string
+          example: Genangan air 30 cm, motor kesulitan lewat
+
+    HitungRuteInput:
+      type: object
+      required:
+        - faskesId
+      properties:
+        faskesId:
+          type: string
+          example: faskes_1
+        userLat:
+          type: number
+          example: -6.8915
+        userLng:
+          type: number
+          example: 107.6107
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check microservice
+      responses:
+        '200':
+          description: Service berjalan normal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth & Mitra]
+      summary: Login pengguna (menghasilkan token JWT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: belva@sigap.itb.ac.id
+                password:
+                  type: string
+                  example: sigap123
+      responses:
+        '200':
+          description: Login berhasil
+        '401':
+          description: Kredensial tidak valid
+
+  /auth/register:
+    post:
+      tags: [Auth & Mitra]
+      summary: Registrasi pengguna baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama, email, password]
+              properties:
+                nama:
+                  type: string
+                  example: Budi Santoso
+                email:
+                  type: string
+                  example: budi@gmail.com
+                password:
+                  type: string
+                  example: rahasia123
+                role:
+                  type: string
+                  enum: [Warga, Mitra]
+                  default: Warga
+      responses:
+        '201':
+          description: Registrasi berhasil
+
+  /auth/me:
+    get:
+      tags: [Auth & Mitra]
+      summary: Profil pengguna yang sedang login
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profil berhasil diambil
+
+  /faskes:
+    get:
+      tags: [Direktori Faskes]
+      summary: Ambil daftar faskes dengan filter kategori dan pencarian
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Kata kunci pencarian nama atau alamat
+        - name: kategori
+          in: query
+          schema:
+            type: string
+            enum: [Semua, Apotek, Klinik, Puskesmas, Rumah Sakit]
+      responses:
+        '200':
+          description: Daftar faskes
+    post:
+      tags: [Direktori Faskes]
+      summary: Tambah faskes manual oleh warga/mitra
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama, jenis, lat, lng, alamat]
+              properties:
+                nama:
+                  type: string
+                jenis:
+                  type: string
+                alamat:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
+                telepon:
+                  type: string
+                jamBuka:
+                  type: string
+      responses:
+        '201':
+          description: Faskes berhasil ditambahkan
+        '400':
+          description: Validasi invariant gagal (koordinat tidak valid atau terdeteksi duplikat <30m)
+
+  /faskes/{id}/klaim:
+    post:
+      tags: [Auth & Mitra]
+      summary: Mengajukan klaim kepemilikan faskes oleh Mitra
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pengajuan klaim tercatat
+
+  /obat:
+    get:
+      tags: [Ketersediaan Obat]
+      summary: Mengambil katalog obat standar
+      responses:
+        '200':
+          description: Daftar obat
+
+  /stok:
+    get:
+      tags: [Ketersediaan Obat]
+      summary: Cek status ketersediaan obat di faskes
+      parameters:
+        - name: faskesId
+          in: query
+          schema:
+            type: string
+        - name: obatId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status stok dengan kesegaran & skor kepercayaan
+
+  /stok/lapor:
+    post:
+      tags: [Ketersediaan Obat]
+      summary: Laporkan ketersediaan stok obat (Warga atau Mitra)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LaporanStokInput'
+      responses:
+        '200':
+          description: Laporan stok berhasil diproses dan status stok dihitung ulang
+        '429':
+          description: Rate limit terlampaui (maksimal 1 laporan per obat per faskes per jam)
+
+  /kondisi-jalan/cuaca:
+    get:
+      tags: [Kondisi Jalan]
+      summary: Mengambil snapshot cuaca langsung dari Open-Meteo dengan fallback siaga
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+            default: -6.89
+        - name: lng
+          in: query
+          schema:
+            type: number
+            default: 107.61
+      responses:
+        '200':
+          description: Snapshot data cuaca
+
+  /kondisi-jalan/bahaya:
+    get:
+      tags: [Kondisi Jalan]
+      summary: Mengambil daftar bahaya jalan (Banjir, Longsor, Jalan Rusak)
+      responses:
+        '200':
+          description: Daftar bahaya jalan
+    post:
+      tags: [Kondisi Jalan]
+      summary: Laporkan titik bahaya jalan
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BahayaJalanInput'
+      responses:
+        '201':
+          description: Bahaya jalan tercatat
+
+  /kondisi-jalan/bahaya/{id}/konfirmasi:
+    post:
+      tags: [Kondisi Jalan]
+      summary: Konfirmasi bahaya jalan oleh warga atau mitra
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Konfirmasi bertambah
+
+  /rute-aman/hitung:
+    post:
+      tags: [Rute Aman]
+      summary: Hitung opsi rute Tercepat vs Teraman beserta skor keamanan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HitungRuteInput'
+      responses:
+        '200':
+          description: Hasil perbandingan rute tercepat dan teraman
+
+  /kartu-siaga:
+    get:
+      tags: [Panduan Siaga]
+      summary: Mengambil kartu panduan edukasi & triage rujukan Kemenkes/WHO
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Kata kunci keluhan sakit (contoh demam anak)
+        - name: urgensi
+          in: query
+          schema:
+            type: string
+            enum: [Semua, RUMAH, PUSKESMAS, IGD]
+      responses:
+        '200':
+          description: Daftar kartu siaga
+
+  /public/faskes:
+    get:
+      tags: [Inter-Group Public]
+      summary: Endpoint publik faskes untuk kelompok lain
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Daftar faskes untuk kelompok lain
+
+  /public/stok-summary:
+    get:
+      tags: [Inter-Group Public]
+      summary: Endpoint ringkasan stok obat untuk kelompok lain
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Ringkasan stok obat
+
+  /public/hazard-alerts:
+    get:
+      tags: [Inter-Group Public]
+      summary: Endpoint peringatan bahaya banjir & jalan untuk kelompok Smart City
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Peringatan bahaya jalan aktif
+
+  /peer/jalanaman:
+    get:
+      tags: [Peer Integrations]
+      summary: Integrasi Kelompok 1 - JalanAman (Smart City & Titik Banjir)
+      responses:
+        '200':
+          description: Data laporan jalanaman (live atau fallback siaga)
+
+  /peer/sehatdekat:
+    get:
+      tags: [Peer Integrations]
+      summary: Integrasi Kelompok 2 - SehatDekat (Antrean Faskes & Kapasitas IGD)
+      responses:
+        '200':
+          description: Data antrean sehatdekat (live atau fallback siaga)

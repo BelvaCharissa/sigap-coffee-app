@@ -1,0 +1,21 @@
+{
+  "name": "sigap-backend-core",
+  "version": "1.0.0",
+  "description": "Layanan Inti Microservice SIGAP (Tugas Besar II3160 TST & II3140 PWAM STEI ITB)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}
