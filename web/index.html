@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGAP - Web & Mobile Layout Showcase (TST × PWAM ITB)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2D6A4F;
+      --primary-light: #40916C;
+      --primary-muted: #52B788;
+      --primary-pastel: #D8F3DC;
+      --primary-subtle: #F2F9F4;
+      --accent-coral: #E76F51;
+      --accent-orange: #F4A261;
+      --bg-page: #F3F6F4;
+      --card-bg: #FFFFFF;
+      --text-main: #1B2E24;
+      --text-muted: #52695E;
+      --text-sub: #889C91;
+      --border-color: #E2ECE5;
+      --shadow-soft: 0 10px 30px rgba(45, 106, 79, 0.08);
+      --radius-phone: 46px;
+      --radius-screen: 38px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Control Bar */
+    .top-navbar {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .mode-switcher {
+      display: flex;
+      background: var(--primary-subtle);
+      padding: 4px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      gap: 4px;
+    }
+
+    .mode-btn {
+      padding: 8px 18px;
+      border-radius: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3);
+    }
+
+    .api-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #E8F5E9;
+      color: #1B5E20;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #C8E6C9;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2E7D32;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Main Container */
+    .showcase-wrapper {
+      padding: 30px 24px 60px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* SECTION 1: GALLERY SHOWCASE (Like the user's reference image) */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 28px;
+      justify-content: center;
+    }
+
+    /* SECTION 2: SINGLE INTERACTIVE PHONE VIEW */
+    .interactive-container {
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      padding-top: 10px;
+    }
+
+    .phone-mockup {
+      width: 320px;
+      height: 670px;
+      background: #111816;
+      border-radius: var(--radius-phone);
+      padding: 10px;
+      box-shadow: 0 25px 60px rgba(27, 46, 36, 0.22), 0 0 0 1px rgba(255,255,255,0.1) inset;
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-page);
+      border-radius: var(--radius-screen);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Dynamic Island / Notch */
+    .dynamic-island {
+      width: 90px;
+      height: 22px;
+      background: #111816;
+      border-radius: 20px;
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    .phone-header-bar {
+      height: 38px;
+      padding: 8px 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      z-index: 99;
+    }
+
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 75px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* FLOATING BOTTOM DOCK NAVIGATION (Mockup faithful) */
+    .floating-dock {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      right: 14px;
+      height: 54px;
+      background: #1B2E24;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+      z-index: 90;
+    }
+
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.55);
+      font-size: 16px;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .dock-item.active {
+      color: #FFFFFF;
+    }
+
+    .dock-item-center {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2D6A4F, #52B788);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-top: -24px;
+      box-shadow: 0 6px 16px rgba(45, 106, 79, 0.45);
+      border: 3px solid #111816;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .dock-item-center:hover {
+      transform: scale(1.08);
+    }
+
+    /* SCREEN 1: SPLASH SCREEN */
+    .screen-splash {
+      background: linear-gradient(160deg, #2D6A4F 0%, #1B4332 100%);
+      color: #FFFFFF;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .splash-logo-card {
+      width: 90px;
+      height: 90px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      color: #FFFFFF;
+      margin-bottom: 20px;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+    }
+
+    .splash-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .splash-sub {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 6px;
+      line-height: 1.4;
+      max-width: 220px;
+    }
+
+    /* SCREEN 2: ONBOARDING */
+    .screen-onboard {
+      padding: 30px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      background: #FFFFFF;
+    }
+
+    .onboard-illustration {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: var(--primary-pastel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 40px 0 28px;
+      color: var(--primary);
+      font-size: 70px;
+    }
+
+    .onboard-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .onboard-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 30px;
+      padding: 0 10px;
+    }
+
+    .btn-pill-primary {
+      width: 100%;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 13px;
+      border-radius: 25px;
+      font-size: 13.5px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(45, 106, 79, 0.25);
+    }
+
+    /* SCREEN 3 & 4: AUTH (LOGIN & REGISTER) */
+    .auth-container {
+      padding: 34px 20px 20px;
+      background: #FFFFFF;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-header {
+      margin-bottom: 22px;
+    }
+
+    .auth-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .auth-header p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 5px;
+    }
+
+    .input-pill {
+      width: 100%;
+      background: var(--primary-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-size: 12.5px;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-pill:focus {
+      border-color: var(--primary);
+      background: #FFFFFF;
+    }
+
+    .social-btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .social-btn {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    /* SCREEN 5: HOME DASHBOARD (Direct replica of reference style) */
+    .home-top-bar {
+      padding: 12px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-profile-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary-pastel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 700;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .location-info .loc-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .location-info .loc-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .icon-round-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Search Bar with Filter */
+    .search-wrapper {
+      padding: 6px 16px 12px;
+    }
+
+    .search-pill-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .search-pill-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      color: var(--text-main);
+      background: transparent;
+    }
+
+    /* Categories Horizontal Pills */
+    .categories-strip {
+      padding: 0 16px 12px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .cat-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .cat-icon-round {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--primary);
+      transition: all 0.2s;
+    }
+
+    .cat-chip.active .cat-icon-round {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(45, 106, 79, 0.25);
+    }
+
+    .cat-chip span {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .cat-chip.active span {
+      color: var(--primary);
+    }
+
+    /* Promo / Weather Alert Card */
+    .promo-banner-card {
+      margin: 0 16px 14px;
+      background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+      border-radius: 20px;
+      padding: 16px;
+      color: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(45, 106, 79, 0.2);
+    }
+
+    .promo-badge {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 9.5px;
+      font-weight: 800;
+      display: inline-block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .promo-title {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .promo-sub {
+      font-size: 11px;
+      opacity: 0.85;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .promo-action-btn {
+      background: #FFFFFF;
+      color: var(--primary);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Faskes Recommendation Cards */
+    .section-title-row {
+      padding: 0 16px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title-row h3 {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .section-title-row a {
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .faskes-card-item {
+      margin: 0 16px 10px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .faskes-card-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .faskes-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      background: var(--primary-pastel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .faskes-details {
+      flex: 1;
+    }
+
+    .faskes-name {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+
+    .faskes-address {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .faskes-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .badge-pill {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .badge-success { background: #E8F5E9; color: #2E7D32; }
+    .badge-warning { background: #FFF3E0; color: #E65100; }
+    .badge-info { background: #E1F5FE; color: #0288D1; }
+
+    /* SCREEN 6: TRACK ORDER / RUTE AMAN (Map polyline & bottom sheet) */
+    .screen-map {
+      height: 100%;
+      position: relative;
+      background: #E8ECE9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-svg-mockup {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .map-floating-top {
+      position: absolute;
+      top: 40px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 10;
+    }
+
+    .map-bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      padding: 16px;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
+      z-index: 20;
+    }
+
+    .eta-box {
+      background: var(--primary-subtle);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .eta-time {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .eta-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .courier-faskes-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .courier-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .call-circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #0288D1;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* SCREEN 7: PROFILE SCREEN */
+    .profile-hero-card {
+      margin: 20px 16px 16px;
+      background: linear-gradient(135deg, #2D6A4F, #40916C);
+      border-radius: 20px;
+      padding: 16px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-avatar-big {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .menu-options-list {
+      margin: 0 16px;
+      background: #FFFFFF;
+      border-radius: 18px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .menu-option-item {
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      transition: background 0.15s;
+    }
+
+    .menu-option-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-option-item:hover {
+      background: var(--primary-subtle);
+    }
+
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary-pastel);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* SCREEN 8: SUCCESS MODAL / SCREEN */
+    .success-screen-wrapper {
+      padding: 60px 24px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background: #FFFFFF;
+    }
+
+    .big-check-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #E8F5E9;
+      border: 3px solid #81C784;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2E7D32;
+      font-size: 38px;
+      margin-bottom: 24px;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Screen Label in Grid Showcase */
+    .card-showcase-label {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .top-navbar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      .interactive-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Control Bar -->
+  <header class="top-navbar">
+    <div class="brand-block">
+      <div class="brand-logo"><i class="fa-solid fa-heart-pulse"></i></div>
+      <div class="brand-title">
+        <h1>SIGAP Web & App Showcase</h1>
+        <p>Sehat • Informasi • Gerak • Akses • Pertolongan (TST × PWAM ITB)</p>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-switcher">
+      <button class="mode-btn active" id="btnModeGallery" onclick="switchMode('gallery')">
+        <i class="fa-solid fa-border-all"></i> Showcase Semua Layar
+      </button>
+      <button class="mode-btn" id="btnModeInteractive" onclick="switchMode('interactive')">
+        <i class="fa-solid fa-mobile-screen"></i> Mode Interaktif
+      </button>
+    </div>
+
+    <!-- Live API Status -->
+    <div class="api-status-badge" id="apiStatusBadge">
+      <div class="status-dot"></div>
+      <span id="apiStatusText">ApiService: Siaga & Online</span>
+    </div>
+  </header>
+
+  <!-- Showcase Content Area -->
+  <main class="showcase-wrapper">
+
+    <!-- MODE 1: GALLERY GRID (Faithfully displays all screens like reference) -->
+    <div class="gallery-grid" id="galleryView">
+
+      <!-- 1. SPLASH SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="screen-splash">
+              <div class="splash-logo-card">
+                <i class="fa-solid fa-kit-medical"></i>
+              </div>
+              <h2 class="splash-title">SIGAP</h2>
+              <p class="splash-sub">Akses Cepat Kebutuhan Obat & Rute Aman Faskes Siaga Bencana</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">1. Splash Screen</div>
+      </div>
+
+      <!-- 2. ONBOARDING SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="phone-header-bar">
+              <span>09:41</span>
+              <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+            </div>
+            <div class="screen-onboard">
+              <div class="onboard-illustration">
+                <i class="fa-solid fa-truck-medical"></i>
+              </div>
+              <h3 class="onboard-title">Kebutuhan Faskes Mudah</h3>
+              <p class="onboard-desc">Cek ketersediaan stok obat akurat dan temukan rute bebas banjir terdekat dalam satu ketukan.</p>
+              <button class="btn-pill-primary" style="margin-top:auto;">Mulai Sekarang <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">2. Onboarding Screen</div>
+      </div>
+
+      <!-- 3. SIGN IN / LOGIN SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="phone-header-bar">
+              <span>09:41</span>
+              <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+            </div>
+            <div class="auth-container">
+              <div class="auth-header">
+                <h2>Masuk Akun</h2>
+                <p>Gunakan akun Warga atau Mitra Faskes</p>
+              </div>
+              <div class="form-group">
+                <label>Email Pengguna</label>
+                <input type="email" class="input-pill" value="warga@sigap.id" readonly>
+              </div>
+              <div class="form-group">
+                <label>Kata Sandi</label>
+                <input type="password" class="input-pill" value="••••••••" readonly>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:18px;">
+                <label><input type="checkbox" checked> Ingat saya</label>
+                <a href="#" style="color:var(--primary); font-weight:700; text-decoration:none;">Lupa sandi?</a>
+              </div>
+              <button class="btn-pill-primary">Masuk</button>
+              <div class="social-btn-row">
+                <div class="social-btn"><i class="fa-brands fa-google" style="color:#DB4437;"></i> Google</div>
+                <div class="social-btn"><i class="fa-solid fa-user-shield" style="color:var(--primary);"></i> Mitra</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">3. Log In Screen</div>
+      </div>
+
+      <!-- 4. SIGN UP / REGISTER SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="phone-header-bar">
+              <span>09:41</span>
+              <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+            </div>
+            <div class="auth-container">
+              <div class="auth-header">
+                <h2>Daftar Akun Baru</h2>
+                <p>Bergabung menjaga siaga kesehatan</p>
+              </div>
+              <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" class="input-pill" value="Indah Ramadhani" readonly>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="input-pill" value="indah@sigap.id" readonly>
+              </div>
+              <div class="form-group">
+                <label>Peran</label>
+                <input type="text" class="input-pill" value="Warga Siaga" readonly>
+              </div>
+              <button class="btn-pill-primary" style="margin-top:10px;">Daftar Akun</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">4. Sign Up Screen</div>
+      </div>
+
+      <!-- 5. HOME SCREEN (HERO LAYOUT EXACT LIKE MOCKUP) -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="phone-header-bar">
+              <span>09:41</span>
+              <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+            </div>
+            <div class="screen-content">
+              <!-- Top Header User & Location -->
+              <div class="home-top-bar">
+                <div class="user-profile-row">
+                  <div class="avatar-circle">I</div>
+                  <div class="location-info">
+                    <div class="loc-sub">Lokasi Anda</div>
+                    <div class="loc-title"><i class="fa-solid fa-location-dot" style="color:var(--primary); font-size:11px;"></i> Dago, Bandung</div>
+                  </div>
+                </div>
+                <div class="icon-round-btn"><i class="fa-regular fa-bell"></i></div>
+              </div>
+
+              <!-- Search Bar -->
+              <div class="search-wrapper">
+                <div class="search-pill-box">
+                  <i class="fa-solid fa-magnifying-glass" style="color:var(--text-sub); font-size:12px;"></i>
+                  <input type="text" placeholder="Cari obat (paracetamol) atau faskes..." value="Paracetamol">
+                  <i class="fa-solid fa-sliders" style="color:var(--primary); font-size:12px;"></i>
+                </div>
+              </div>
+
+              <!-- Categories -->
+              <div class="categories-strip">
+                <div class="cat-chip active">
+                  <div class="cat-icon-round"><i class="fa-solid fa-capsules"></i></div>
+                  <span>Semua</span>
+                </div>
+                <div class="cat-chip">
+                  <div class="cat-icon-round"><i class="fa-solid fa-hospital"></i></div>
+                  <span>Puskesmas</span>
+                </div>
+                <div class="cat-chip">
+                  <div class="cat-icon-round"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
+                  <span>Apotek</span>
+                </div>
+                <div class="cat-chip">
+                  <div class="cat-icon-round"><i class="fa-solid fa-shield-heart"></i></div>
+                  <span>IGD 24 Jam</span>
+                </div>
+              </div>
+
+              <!-- Promo / Weather Alert Card -->
+              <div class="promo-banner-card">
+                <div class="promo-badge"><i class="fa-solid fa-cloud-rain"></i> Open-Meteo Live</div>
+                <h4 class="promo-title">Hujan Sedang (12.5 mm)</h4>
+                <p class="promo-sub">Waspada 2 titik genangan di Simpang Dago. Jalur alternatif aktif.</p>
+                <button class="promo-action-btn">Cari Rute Aman <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></button>
+              </div>
+
+              <!-- Faskes List Section -->
+              <div class="section-title-row">
+                <h3>Fasilitas Terdekat</h3>
+                <a href="#">Lihat Semua</a>
+              </div>
+
+              <div class="faskes-card-item">
+                <div class="faskes-thumb"><i class="fa-solid fa-hospital"></i></div>
+                <div class="faskes-details">
+                  <div class="faskes-name">Puskesmas Dago Girang</div>
+                  <div class="faskes-address">Jl. Ir. H. Juanda No. 340 • 0.8 km</div>
+                  <div class="faskes-meta-row">
+                    <span class="badge-pill badge-success"><i class="fa-solid fa-check"></i> Stok Ada</span>
+                    <span style="font-size:10px; font-weight:700; color:#F59E0B;"><i class="fa-solid fa-star"></i> 4.8</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="faskes-card-item">
+                <div class="faskes-thumb" style="background:#E1F5FE; color:#0288D1;"><i class="fa-solid fa-prescription-bottle"></i></div>
+                <div class="faskes-details">
+                  <div class="faskes-name">Apotek Kimia Farma Dago</div>
+                  <div class="faskes-address">Jl. Ir. H. Juanda No. 120 • 1.2 km</div>
+                  <div class="faskes-meta-row">
+                    <span class="badge-pill badge-success">Stok Ada</span>
+                    <span style="font-size:10px; font-weight:700; color:#F59E0B;"><i class="fa-solid fa-star"></i> 4.9</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Curved Dock -->
+            <div class="floating-dock">
+              <a href="#" class="dock-item active"><i class="fa-solid fa-house"></i></a>
+              <a href="#" class="dock-item"><i class="fa-solid fa-hospital"></i></a>
+              <div class="dock-item-center"><i class="fa-solid fa-shield-halved"></i></div>
+              <a href="#" class="dock-item"><i class="fa-solid fa-route"></i></a>
+              <a href="#" class="dock-item"><i class="fa-solid fa-user"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">5. Home Dashboard</div>
+      </div>
+
+      <!-- 6. TRACK ORDER / RUTE AMAN (Map polyline & bottom sheet) -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="screen-map">
+              <div class="map-floating-top">
+                <div class="icon-round-btn"><i class="fa-solid fa-chevron-left"></i></div>
+                <div style="background:#FFFFFF; padding:6px 14px; border-radius:20px; font-size:11.5px; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  Rute Bebas Bahaya
+                </div>
+                <div class="icon-round-btn"><i class="fa-solid fa-share-nodes"></i></div>
+              </div>
+
+              <!-- Visual Map Mockup with SVG Route -->
+              <svg class="map-svg-mockup" viewBox="0 0 320 400" preserveAspectRatio="none">
+                <!-- Roads -->
+                <path d="M 40,80 Q 120,120 160,200 T 280,320" fill="none" stroke="#CBD5E1" stroke-width="12" stroke-linecap="round"/>
+                <path d="M 280,60 L 40,340" fill="none" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round"/>
+                
+                <!-- Safe Route Polyline (Green Glowing) -->
+                <path d="M 60,110 Q 140,150 170,220 T 260,290" fill="none" stroke="#2D6A4F" stroke-width="5" stroke-linecap="round" stroke-dasharray="6,4"/>
+                
+                <!-- Origin Pin -->
+                <circle cx="60" cy="110" r="10" fill="#2D6A4F"/>
+                <circle cx="60" cy="110" r="4" fill="#FFFFFF"/>
+                
+                <!-- Hazard Flood Alert Marker (Simpang Dago avoided) -->
+                <circle cx="190" cy="160" r="12" fill="#FEE2E2"/>
+                <text x="184" y="166" font-size="14">⚠️</text>
+                
+                <!-- Destination Faskes Pin -->
+                <circle cx="260" cy="290" r="14" fill="#E76F51"/>
+                <text x="254" y="295" font-size="12" fill="#FFFFFF">🏥</text>
+              </svg>
+
+              <!-- Bottom Sheet Card -->
+              <div class="map-bottom-sheet">
+                <div class="eta-box">
+                  <div>
+                    <div class="eta-time">10 - 15 Menit</div>
+                    <div class="eta-sub">Jarak 2.8 km • Skor Aman: 94/100</div>
+                  </div>
+                  <span class="badge-pill badge-success"><i class="fa-solid fa-shield-check"></i> Bebas Banjir</span>
+                </div>
+
+                <div class="courier-faskes-card">
+                  <div class="courier-info">
+                    <div class="avatar-circle" style="background:#E1F5FE; color:#0288D1;"><i class="fa-solid fa-hospital"></i></div>
+                    <div>
+                      <div style="font-size:12px; font-weight:800; color:var(--text-main);">Puskesmas Dago Girang</div>
+                      <div style="font-size:10px; color:var(--text-muted);">Jl. Ir. H. Juanda No. 340</div>
+                    </div>
+                  </div>
+                  <button class="call-circle-btn"><i class="fa-solid fa-phone"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">6. Track Rute Aman (Map)</div>
+      </div>
+
+      <!-- 7. PROFILE SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="phone-header-bar">
+              <span>09:41</span>
+              <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+            </div>
+            <div class="screen-content">
+              <div class="profile-hero-card">
+                <div class="profile-avatar-big">IR</div>
+                <div>
+                  <div style="font-size:14px; font-weight:800;">Indah Ramadhani</div>
+                  <div style="font-size:10.5px; opacity:0.85;">indah@sigap.id • NIM 18224037</div>
+                  <div style="margin-top:4px;"><span class="badge-pill" style="background:rgba(255,255,255,0.25); color:#FFFFFF;">Warga Siaga Terverifikasi</span></div>
+                </div>
+              </div>
+
+              <div class="menu-options-list">
+                <div class="menu-option-item">
+                  <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-solid fa-user-pen"></i></div>
+                    <span>Kelola Profil Akun</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+                </div>
+                <div class="menu-option-item">
+                  <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <span>Riwayat Laporan Stok</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+                </div>
+                <div class="menu-option-item">
+                  <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-solid fa-server"></i></div>
+                    <span>Server STB & Cloudflare</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+                </div>
+                <div class="menu-option-item">
+                  <div class="menu-left">
+                    <div class="menu-icon" style="background:#FEE2E2; color:#B91C1C;"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+                    <span style="color:#B91C1C;">Keluar / Ganti Akun</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Curved Dock -->
+            <div class="floating-dock">
+              <a href="#" class="dock-item"><i class="fa-solid fa-house"></i></a>
+              <a href="#" class="dock-item"><i class="fa-solid fa-hospital"></i></a>
+              <div class="dock-item-center"><i class="fa-solid fa-shield-halved"></i></div>
+              <a href="#" class="dock-item"><i class="fa-solid fa-route"></i></a>
+              <a href="#" class="dock-item active"><i class="fa-solid fa-user"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">7. Profile Screen</div>
+      </div>
+
+      <!-- 8. SUCCESS SCREEN -->
+      <div>
+        <div class="phone-mockup">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <div class="success-screen-wrapper">
+              <div class="big-check-circle"><i class="fa-solid fa-check"></i></div>
+              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">Laporan Berhasil!</h3>
+              <p style="font-size:11.5px; color:var(--text-muted); line-height:1.4; margin-bottom:30px;">
+                Status ketersediaan obat berhasil diperbarui secara realtime ke sistem microservice SIGAP.
+              </p>
+              <button class="btn-pill-primary">Kembali ke Beranda</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-showcase-label">8. Success Confirmation</div>
+      </div>
+
+    </div>
+
+    <!-- MODE 2: INTERACTIVE LIVE PHONE -->
+    <div class="interactive-container" id="interactiveView">
+      <div class="phone-mockup" style="transform:scale(1.05);">
+        <div class="dynamic-island"></div>
+        <div class="phone-screen" id="interactiveScreenFrame">
+          <!-- Interactive screens injected via JS -->
+        </div>
+      </div>
+
+      <!-- Control Panel Side -->
+      <div style="background:#FFFFFF; border:1px solid var(--border-color); border-radius:24px; padding:24px; max-width:440px; box-shadow:var(--shadow-soft);">
+        <h3 style="font-size:17px; font-weight:800; color:var(--primary); margin-bottom:6px;">Panel Kontrol ApiService Interaktif</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">Uji langsung fungsi ApiService dengan simulasi respons microservice backend.</p>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn-pill-primary" onclick="loadLiveScreen('home')">
+            <i class="fa-solid fa-house"></i> Buka Layar Beranda
+          </button>
+          <button class="btn-pill-primary" style="background:#0288D1;" onclick="loadLiveScreen('route')">
+            <i class="fa-solid fa-map-location-dot"></i> Hitung & Pantau Rute Aman
+          </button>
+          <button class="btn-pill-primary" style="background:#E76F51;" onclick="loadLiveScreen('lapor')">
+            <i class="fa-solid fa-pen-to-square"></i> Lapor Stok Obat Realtime
+          </button>
+          <button class="btn-pill-primary" style="background:#4A5568;" onclick="loadLiveScreen('profile')">
+            <i class="fa-solid fa-user-gear"></i> Buka Layar Profil & STB
+          </button>
+        </div>
+
+        <div style="margin-top:20px; padding:14px; background:var(--primary-subtle); border-radius:14px; border:1px solid var(--border-color); font-size:11.5px;">
+          <strong>Endpoints Aktif di ApiService.js:</strong>
+          <ul style="padding-left:18px; margin-top:6px; color:var(--text-muted);">
+            <li><code>/api/health</code> (STB & Tunnel Monitor)</li>
+            <li><code>/api/auth/login</code> (JWT Bearer Token)</li>
+            <li><code>/api/faskes</code> & <code>/api/stok</code></li>
+            <li><code>/api/kondisi-jalan/cuaca</code> (Open-Meteo)</li>
+            <li><code>/api/peer/jalanaman</code> (Kelompok 1)</li>
+            <li><code>/api/peer/sehatdekat</code> (Kelompok 2)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { WebApiService } from './apiService.js';
+
+    window.switchMode = function(mode) {
+      const gallery = document.getElementById('galleryView');
+      const interactive = document.getElementById('interactiveView');
+      const btnG = document.getElementById('btnModeGallery');
+      const btnI = document.getElementById('btnModeInteractive');
+
+      if (mode === 'interactive') {
+        gallery.style.display = 'none';
+        interactive.style.display = 'flex';
+        btnG.classList.remove('active');
+        btnI.classList.add('active');
+        loadLiveScreen('home');
+      } else {
+        gallery.style.display = 'grid';
+        interactive.style.display = 'none';
+        btnG.classList.add('active');
+        btnI.classList.remove('active');
+      }
+    };
+
+    window.loadLiveScreen = async function(screen) {
+      const frame = document.getElementById('interactiveScreenFrame');
+      if (screen === 'home') {
+        const weather = await WebApiService.fetchWeather();
+        const faskesList = await WebApiService.fetchFaskes();
+
+        frame.innerHTML = `
+          <div class="phone-header-bar">
+            <span>09:41</span>
+            <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+          </div>
+          <div class="screen-content">
+            <div class="home-top-bar">
+              <div class="user-profile-row">
+                <div class="avatar-circle">I</div>
+                <div class="location-info">
+                  <div class="loc-sub">Lokasi Anda</div>
+                  <div class="loc-title"><i class="fa-solid fa-location-dot" style="color:var(--primary); font-size:11px;"></i> Dago, Bandung</div>
+                </div>
+              </div>
+              <div class="icon-round-btn"><i class="fa-regular fa-bell"></i></div>
+            </div>
+
+            <div class="search-wrapper">
+              <div class="search-pill-box">
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--text-sub); font-size:12px;"></i>
+                <input type="text" placeholder="Cari obat atau faskes...">
+                <i class="fa-solid fa-sliders" style="color:var(--primary); font-size:12px;"></i>
+              </div>
+            </div>
+
+            <div class="promo-banner-card">
+              <div class="promo-badge"><i class="fa-solid fa-cloud-rain"></i> Live Cuaca</div>
+              <h4 class="promo-title">${weather.kondisi} (${weather.suhu}°C)</h4>
+              <p class="promo-sub">Curah Hujan ${weather.curahHujanMm} mm/jam. Sistem rute siaga aktif.</p>
+              <button class="promo-action-btn" onclick="loadLiveScreen('route')">Lihat Rute Bebas Banjir <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></button>
+            </div>
+
+            <div class="section-title-row">
+              <h3>Daftar Faskes & Stok</h3>
+              <span style="font-size:11px; color:var(--primary); font-weight:700;">Live Microservice</span>
+            </div>
+
+            ${faskesList.map(f => `
+              <div class="faskes-card-item" onclick="loadLiveScreen('lapor')">
+                <div class="faskes-thumb"><i class="fa-solid fa-hospital"></i></div>
+                <div class="faskes-details">
+                  <div class="faskes-name">${f.nama}</div>
+                  <div class="faskes-address">${f.alamat} • ${f.distance || '1.0 km'}</div>
+                  <div class="faskes-meta-row">
+                    <span class="badge-pill badge-success"><i class="fa-solid fa-check"></i> Paracetamol Ada</span>
+                    <span style="font-size:10px; font-weight:700; color:#F59E0B;"><i class="fa-solid fa-star"></i> ${f.rating || 4.8}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="floating-dock">
+            <div class="dock-item active" onclick="loadLiveScreen('home')"><i class="fa-solid fa-house"></i></div>
+            <div class="dock-item" onclick="loadLiveScreen('lapor')"><i class="fa-solid fa-hospital"></i></div>
+            <div class="dock-item-center" onclick="loadLiveScreen('route')"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="dock-item" onclick="loadLiveScreen('route')"><i class="fa-solid fa-route"></i></div>
+            <div class="dock-item" onclick="loadLiveScreen('profile')"><i class="fa-solid fa-user"></i></div>
+          </div>
+        `;
+      } else if (screen === 'route') {
+        const rute = await WebApiService.hitungRuteAman();
+        frame.innerHTML = `
+          <div class="screen-map">
+            <div class="map-floating-top">
+              <div class="icon-round-btn" onclick="loadLiveScreen('home')"><i class="fa-solid fa-chevron-left"></i></div>
+              <div style="background:#FFFFFF; padding:6px 14px; border-radius:20px; font-size:11.5px; font-weight:800;">
+                ${rute.ruteTerpilih}
+              </div>
+              <div class="icon-round-btn"><i class="fa-solid fa-share-nodes"></i></div>
+            </div>
+
+            <svg class="map-svg-mockup" viewBox="0 0 320 400" preserveAspectRatio="none">
+              <path d="M 40,80 Q 120,120 160,200 T 280,320" fill="none" stroke="#CBD5E1" stroke-width="12" stroke-linecap="round"/>
+              <path d="M 60,110 Q 140,150 170,220 T 260,290" fill="none" stroke="#2D6A4F" stroke-width="5" stroke-linecap="round" stroke-dasharray="6,4"/>
+              <circle cx="60" cy="110" r="10" fill="#2D6A4F"/>
+              <circle cx="60" cy="110" r="4" fill="#FFFFFF"/>
+              <circle cx="190" cy="160" r="12" fill="#FEE2E2"/>
+              <text x="184" y="166" font-size="14">⚠️</text>
+              <circle cx="260" cy="290" r="14" fill="#E76F51"/>
+              <text x="254" y="295" font-size="12" fill="#FFFFFF">🏥</text>
+            </svg>
+
+            <div class="map-bottom-sheet">
+              <div class="eta-box">
+                <div>
+                  <div class="eta-time">${rute.estimasiWaktuMenit} Menit</div>
+                  <div class="eta-sub">${rute.jarakKm} km • Keamanan: ${rute.skorKeamanan}%</div>
+                </div>
+                <span class="badge-pill badge-success"><i class="fa-solid fa-shield-check"></i> ${rute.levelRisiko}</span>
+              </div>
+              <div class="courier-faskes-card">
+                <div class="courier-info">
+                  <div class="avatar-circle" style="background:#E1F5FE; color:#0288D1;"><i class="fa-solid fa-hospital"></i></div>
+                  <div>
+                    <div style="font-size:12px; font-weight:800; color:var(--text-main);">Puskesmas Dago Girang</div>
+                    <div style="font-size:10px; color:var(--text-muted);">Jl. Ir. H. Juanda No. 340</div>
+                  </div>
+                </div>
+                <button class="call-circle-btn" onclick="alert('Menghubungi faskes...')"><i class="fa-solid fa-phone"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (screen === 'lapor') {
+        frame.innerHTML = `
+          <div class="phone-header-bar">
+            <span onclick="loadLiveScreen('home')" style="cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Kembali</span>
+            <span>Lapor Stok</span>
+          </div>
+          <div class="auth-container">
+            <div class="auth-header">
+              <h2>Perbarui Stok Obat</h2>
+              <p>Puskesmas Dago Girang</p>
+            </div>
+            <div class="form-group">
+              <label>Pilih Obat</label>
+              <input type="text" class="input-pill" value="Paracetamol 500mg Tablet" readonly>
+            </div>
+            <div class="form-group">
+              <label>Status Ketersediaan</label>
+              <div style="display:flex; gap:8px; margin-top:4px;">
+                <button class="btn-pill-primary" style="flex:1; padding:8px; font-size:12px;">Ada</button>
+                <button class="btn-pill-primary" style="flex:1; padding:8px; font-size:12px; background:#E2ECE5; color:var(--text-main);">Habis</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Catatan Tambahan</label>
+              <input type="text" class="input-pill" placeholder="Contoh: Stok tersedia di apotek rawat jalan">
+            </div>
+            <button class="btn-pill-primary" style="margin-top:16px;" onclick="loadLiveScreen('success')">
+              Kirim Laporan Stok Realtime
+            </button>
+          </div>
+        `;
+      } else if (screen === 'success') {
+        frame.innerHTML = `
+          <div class="success-screen-wrapper">
+            <div class="big-check-circle"><i class="fa-solid fa-check"></i></div>
+            <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">Laporan Berhasil!</h3>
+            <p style="font-size:11.5px; color:var(--text-muted); line-height:1.4; margin-bottom:30px;">
+              Status stok berhasil dikirim ke microservice backend dan disinkronkan ke seluruh warga.
+            </p>
+            <button class="btn-pill-primary" onclick="loadLiveScreen('home')">Kembali ke Beranda</button>
+          </div>
+        `;
+      } else if (screen === 'profile') {
+        frame.innerHTML = `
+          <div class="phone-header-bar">
+            <span>09:41</span>
+            <span><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+          </div>
+          <div class="screen-content">
+            <div class="profile-hero-card">
+              <div class="profile-avatar-big">IR</div>
+              <div>
+                <div style="font-size:14px; font-weight:800;">Indah Ramadhani</div>
+                <div style="font-size:10.5px; opacity:0.85;">indah@sigap.id • NIM 18224037</div>
+                <div style="margin-top:4px;"><span class="badge-pill" style="background:rgba(255,255,255,0.25); color:#FFFFFF;">Warga Siaga Terverifikasi</span></div>
+              </div>
+            </div>
+
+            <div class="menu-options-list">
+              <div class="menu-option-item" onclick="alert('Status Server: OK | Port 3000 | JWT Aktif')">
+                <div class="menu-left">
+                  <div class="menu-icon"><i class="fa-solid fa-server"></i></div>
+                  <span>Cek Koneksi Microservice STB</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+              </div>
+              <div class="menu-option-item" onclick="loadLiveScreen('home')">
+                <div class="menu-left">
+                  <div class="menu-icon"><i class="fa-solid fa-house"></i></div>
+                  <span>Beranda Faskes & Rute</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color:var(--text-sub); font-size:10px;"></i>
+              </div>
+            </div>
+          </div>
+          <div class="floating-dock">
+            <div class="dock-item" onclick="loadLiveScreen('home')"><i class="fa-solid fa-house"></i></div>
+            <div class="dock-item" onclick="loadLiveScreen('lapor')"><i class="fa-solid fa-hospital"></i></div>
+            <div class="dock-item-center" onclick="loadLiveScreen('route')"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="dock-item" onclick="loadLiveScreen('route')"><i class="fa-solid fa-route"></i></div>
+            <div class="dock-item active" onclick="loadLiveScreen('profile')"><i class="fa-solid fa-user"></i></div>
+          </div>
+        `;
+      }
+    };
+
+    // Check health on load
+    WebApiService.checkHealth().then(res => {
+      const badge = document.getElementById('apiStatusText');
+      if (res && res.status === 'OK') {
+        badge.innerText = 'ApiService: Microservice Online (Port 3000)';
+      }
+    });
+  </script>
+</body>
+</html>

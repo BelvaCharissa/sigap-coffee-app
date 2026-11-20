@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const apiRoutes = require('./routes/api.routes');
 
 const app = express();
@@ -17,6 +18,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve Web Layout Showcase
+const webDir = path.join(__dirname, '../../web');
+app.use('/web', express.static(webDir));
+
 // Request logger for STB / dev console
 app.use((req, res, next) => {
   const start = Date.now();
@@ -27,15 +32,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root friendly welcome
+// Root: Serve Web Layout Showcase if browser, JSON if API client
 app.get('/', (req, res) => {
-  res.json({
-    service: 'SIGAP Microservice Core (TST x PWAM)',
-    status: 'online',
-    version: '1.0.0',
-    documentation: '/api/health',
-    endpoints: '/api/...',
-  });
+  if (req.accepts('html')) {
+    res.sendFile(path.join(webDir, 'index.html'));
+  } else {
+    res.json({
+      service: 'SIGAP Microservice Core (TST x PWAM)',
+      status: 'online',
+      version: '1.0.0',
+      webShowcase: '/web',
+      documentation: '/api/health',
+      endpoints: '/api/...',
+    });
+  }
 });
 
 // Mount API routes under /api

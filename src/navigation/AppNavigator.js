@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -20,7 +20,22 @@ import KartuDetailScreen from '../screens/KartuDetailScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator (5 Layar Utama)
+// Custom Center Action Button (Mirrors the circular action button from mockup)
+function CenterSiagaButton({ children, onPress }) {
+  return (
+    <TouchableOpacity
+      style={styles.centerBtnWrapper}
+      onPress={onPress}
+      activeOpacity={0.85}
+    >
+      <View style={styles.centerBtnInner}>
+        <Ionicons name="shield-half" size={24} color="#FFFFFF" />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// Bottom Tab Navigator (Sleek Floating Dock Style matching the reference)
 function MainTabNavigator() {
   return (
     <Tab.Navigator
@@ -36,18 +51,16 @@ function MainTabNavigator() {
           if (route.name === 'Beranda') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Faskes') {
-            iconName = focused ? 'medical' : 'medical-outline';
+            iconName = focused ? 'business' : 'business-outline';
           } else if (route.name === 'Rute') {
-            iconName = focused ? 'shield-checkmark' : 'shield-checkmark-outline';
-          } else if (route.name === 'Edukasi') {
-            iconName = focused ? 'book' : 'book-outline';
+            iconName = focused ? 'navigate' : 'navigate-outline';
           } else if (route.name === 'Profil') {
             iconName = focused ? 'person' : 'person-outline';
           }
 
           return (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Ionicons name={iconName} size={22} color={color} />
+              <Ionicons name={iconName} size={20} color={color} />
             </View>
           );
         },
@@ -64,14 +77,17 @@ function MainTabNavigator() {
         options={{ tabBarLabel: 'Faskes & Obat' }}
       />
       <Tab.Screen
+        name="Edukasi"
+        component={KartuSiagaScreen}
+        options={{
+          tabBarLabel: 'Siaga',
+          tabBarButton: (props) => <CenterSiagaButton {...props} />,
+        }}
+      />
+      <Tab.Screen
         name="Rute"
         component={SafeRouteScreen}
         options={{ tabBarLabel: 'Rute Aman' }}
-      />
-      <Tab.Screen
-        name="Edukasi"
-        component={KartuSiagaScreen}
-        options={{ tabBarLabel: 'Kartu Siaga' }}
       />
       <Tab.Screen
         name="Profil"
@@ -108,24 +124,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: colors.cardBorder,
-    height: Platform.OS === 'ios' ? 88 : 66,
-    paddingBottom: Platform.OS === 'ios' ? 26 : 8,
-    paddingTop: 8,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    height: Platform.OS === 'ios' ? 84 : 64,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+    paddingTop: 6,
+    elevation: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
   },
   tabBarLabel: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
+    marginTop: -2,
   },
   iconContainer: {
     padding: 3,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   iconContainerActive: {
     backgroundColor: colors.primaryPastel,
+  },
+  centerBtnWrapper: {
+    top: -18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centerBtnInner: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

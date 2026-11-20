@@ -25,6 +25,7 @@ import ModalLaporStok from '../components/ModalLaporStok';
 export default function HomeScreen({ navigation }) {
   const { currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [weather, setWeather] = useState(kondisiJalanService.getCuacaSnapshot());
   const [faskesList, setFaskesList] = useState([]);
   const [kartuRekomendasi, setKartuRekomendasi] = useState([]);
@@ -213,6 +214,35 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* Categories Strip (Matches Reference Mockup) */}
+        <View style={styles.categoriesSection}>
+          <Text style={styles.categoriesTitle}>Kategori Faskes</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+            {[
+              { id: 'Semua', label: 'Semua', icon: 'apps' },
+              { id: 'Puskesmas', label: 'Puskesmas', icon: 'business' },
+              { id: 'Apotek', label: 'Apotek', icon: 'medkit' },
+              { id: 'Rumah Sakit', label: 'Rumah Sakit', icon: 'fitness' },
+              { id: 'Klinik', label: 'Klinik', icon: 'bandage' },
+            ].map((cat) => {
+              const active = selectedCategory === cat.id;
+              return (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[styles.categoryChip, active && styles.categoryChipActive]}
+                  onPress={() => setSelectedCategory(cat.id)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.categoryIconWrap, active && styles.categoryIconWrapActive]}>
+                    <Ionicons name={cat.icon} size={18} color={active ? '#FFFFFF' : colors.primary} />
+                  </View>
+                  <Text style={[styles.categoryText, active && styles.categoryTextActive]}>{cat.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
         {/* Section: Kartu Siaga Penting (Triage Edukasi Sesuai Keluhan) */}
         <View style={styles.sectionHeaderRow}>
           <View>
@@ -247,7 +277,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.cardListContainer}>
-          {faskesList.slice(0, 4).map((f) => {
+          {(selectedCategory === 'Semua' ? faskesList : faskesList.filter(f => f.jenis === selectedCategory)).slice(0, 4).map((f) => {
             const stokInfo = ketersediaanObatService.getStokFaskes(f.id, selectedObat?.id || 'obat_1');
             return (
               <FaskesCard
@@ -477,5 +507,53 @@ const styles = StyleSheet.create({
   },
   cardListContainer: {
     paddingHorizontal: 16,
+  },
+  categoriesSection: {
+    paddingVertical: 10,
+  },
+  categoriesTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.text,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
+  categoryScroll: {
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  categoryChip: {
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    minWidth: 70,
+  },
+  categoryChipActive: {
+    backgroundColor: colors.primaryPastel,
+    borderColor: colors.primary,
+  },
+  categoryIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: colors.primarySubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  categoryIconWrapActive: {
+    backgroundColor: colors.primary,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textSecondary,
+  },
+  categoryTextActive: {
+    color: colors.primary,
   },
 });
