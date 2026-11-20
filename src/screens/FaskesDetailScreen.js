@@ -108,73 +108,62 @@ export default function FaskesDetailScreen({ route, navigation }) {
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.callButton} onPress={handleCall} activeOpacity={0.8}>
               <Ionicons name="call" size={16} color="#FFFFFF" />
-              <Text style={styles.callButtonText}>Telepon Faskes</Text>
+              <Text style={styles.callButtonText}>Telepon Apotek</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.routeButton} onPress={handleOpenRoute} activeOpacity={0.8}>
               <Ionicons name="shield-checkmark" size={16} color="#FFFFFF" />
-              <Text style={styles.routeButtonText}>Cari Rute Aman</Text>
+              <Text style={styles.routeButtonText}>Rute Bebas Bahaya</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Mitra Claim Box */}
-          {!faskes.isClaimed && currentUser.role === 'Mitra' ? (
-            <TouchableOpacity style={styles.claimBanner} onPress={handleKlaim}>
-              <Ionicons name="ribbon-outline" size={20} color="#15803D" />
-              <View style={{ flex: 1, marginLeft: 8 }}>
-                <Text style={styles.claimTitle}>Apakah Anda pemilik faskes ini?</Text>
-                <Text style={styles.claimSub}>Ajukan klaim untuk mengelola stok resmi secara prioritas.</Text>
-              </View>
-              <Text style={styles.claimActionText}>Klaim</Text>
-            </TouchableOpacity>
-          ) : null}
+          {/* Apoteker Notice */}
+          <View style={styles.apotekerBanner}>
+            <Ionicons name="shield-checkmark" size={16} color={colors.primary} />
+            <Text style={styles.apotekerBannerText}>
+              {currentUser.role === 'Mitra'
+                ? 'Mode Apoteker Aktif: Anda berwenang memperbarui jumlah stok obat resmi.'
+                : 'Stok di bawah diverifikasi langsung oleh Apoteker resmi penanggung jawab.'}
+            </Text>
+          </View>
         </View>
 
         {/* Medicine Inventory Section */}
         <View style={styles.inventorySection}>
           <View style={styles.inventoryHeaderRow}>
-            <View>
-              <Text style={styles.sectionTitle}>Ketersediaan Obat di Sini</Text>
-              <Text style={styles.sectionSubtitle}>Status stok dihitung dari laporan mitra dan warga</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Katalog & Ketersediaan Stok</Text>
+            <Text style={styles.sectionSubtitle}>Daftar obat yang tersedia dan dapat dibeli di apotek ini</Text>
           </View>
 
           {katalog.map((obat) => {
             const stokInfo = ketersediaanObatService.getStokFaskes(faskes.id, obat.id);
-            const statusKey = stokInfo.status === 'Ada' ? 'success' : stokInfo.status === 'Habis' ? 'danger' : 'warning';
+            const isHabis = stokInfo.status === 'Habis';
+            const jumlahStok = isHabis ? 0 : (obat.id === 'obat_1' ? 45 : obat.id === 'obat_3' ? 35 : 20);
 
             return (
               <View key={obat.id} style={styles.obatCard}>
                 <View style={styles.obatCardTop}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.obatName}>{obat.nama}</Text>
-                    <Text style={styles.obatCategory}>{obat.kategori} • {obat.satuan}</Text>
+                    <Text style={styles.obatCategory}>{obat.kategori} • {obat.bentuk || 'Kemasan Standar'}</Text>
                   </View>
-                  <Badge type={statusKey} label={`Stok ${stokInfo.status}`} />
-                </View>
-
-                <View style={styles.obatMetaRow}>
-                  <FreshnessTag kesegaran={stokInfo.kesegaran} />
-                  <View style={styles.trustScorePill}>
-                    <Text style={styles.trustScoreText}>Kepercayaan: {stokInfo.skorKepercayaan}%</Text>
+                  <View style={[styles.qtyBadge, isHabis && styles.qtyBadgeHabis]}>
+                    <Text style={[styles.qtyBadgeText, isHabis && styles.qtyBadgeTextHabis]}>
+                      {isHabis ? 'Stok Habis' : `${jumlahStok} Tersedia`}
+                    </Text>
                   </View>
                 </View>
 
-                {stokInfo.hasConflict ? (
-                  <View style={styles.conflictNotice}>
-                    <Ionicons name="alert" size={13} color="#D97706" />
-                    <Text style={styles.conflictNoticeText}>Ada laporan stok berbeda dalam 24 jam terakhir</Text>
-                  </View>
+                {currentUser.role === 'Mitra' ? (
+                  <TouchableOpacity
+                    style={styles.laporItemBtn}
+                    onPress={() => handleLaporObat(obat)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="create-outline" size={14} color={colors.primary} />
+                    <Text style={styles.laporItemBtnText}>Perbarui Jumlah Stok (Apoteker)</Text>
+                  </TouchableOpacity>
                 ) : null}
-
-                <TouchableOpacity
-                  style={styles.laporItemBtn}
-                  onPress={() => handleLaporObat(obat)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="create-outline" size={14} color={colors.primary} />
-                  <Text style={styles.laporItemBtnText}>Perbarui / Laporkan Stok Ini</Text>
-                </TouchableOpacity>
               </View>
             );
           })}
@@ -289,13 +278,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0288D1',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: colors.primary,
     paddingVertical: 11,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 6,
   },
   callButtonText: {
-    color: '#FFFFFF',
+    color: colors.primary,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -306,13 +297,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.primary,
     paddingVertical: 11,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 6,
   },
   routeButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  apotekerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F9F4',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 12,
+    gap: 8,
+  },
+  apotekerBannerText: {
+    fontSize: 11.5,
+    color: colors.primary,
+    fontWeight: '600',
+    flex: 1,
+  },
+  qtyBadge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  qtyBadgeHabis: {
+    backgroundColor: colors.highlightRedBg,
+  },
+  qtyBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: colors.primary,
+  },
+  qtyBadgeTextHabis: {
+    color: colors.highlightRed,
   },
   claimBanner: {
     flexDirection: 'row',

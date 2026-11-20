@@ -139,6 +139,31 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Banner Iklan Edukatif Siaga (Sisi Edukasi Kesehatan & Bencana) */}
+        <TouchableOpacity
+          style={styles.eduBannerCard}
+          onPress={() => navigation.navigate('Edukasi')}
+          activeOpacity={0.9}
+        >
+          <View style={styles.eduBadgeRow}>
+            <View style={styles.eduBadge}>
+              <Ionicons name="bulb-outline" size={12} color={colors.primary} />
+              <Text style={styles.eduBadgeText}>EDUKASI SIAGA KESEHATAN</Text>
+            </View>
+            <Ionicons name="book-outline" size={16} color={colors.primary} />
+          </View>
+          <Text style={styles.eduTitle}>
+            Kapan Cukup Rawat di Rumah vs Kapan Harus ke IGD?
+          </Text>
+          <Text style={styles.eduDesc}>
+            Demam anak &lt; 38.5°C cukup kompres &amp; paracetamol. Kenali tanda bahaya darurat cuaca ekstrem sebelum panik.
+          </Text>
+          <View style={styles.eduActionRow}>
+            <Text style={styles.eduActionText}>Buka Panduan Kartu Siaga</Text>
+            <Ionicons name="arrow-forward" size={12} color={colors.primary} />
+          </View>
+        </TouchableOpacity>
+
         {/* Horizontal Category Chips */}
         <View style={styles.categorySection}>
           <ScrollView
@@ -328,6 +353,55 @@ const styles = StyleSheet.create({
   filterBtn: {
     padding: 4,
     marginLeft: 6,
+  },
+  eduBannerCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#F2F9F4',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 16,
+  },
+  eduBadgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  eduBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  eduBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.primary,
+    letterSpacing: 0.5,
+  },
+  eduTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#1B2E24',
+    marginBottom: 4,
+    lineHeight: 18,
+  },
+  eduDesc: {
+    fontSize: 11.5,
+    color: '#52695E',
+    lineHeight: 16,
+    marginBottom: 8,
+  },
+  eduActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  eduActionText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: colors.primary,
   },
   categorySection: {
     marginBottom: 16,

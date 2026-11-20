@@ -60,6 +60,14 @@ export default function LandingScreen({ navigation }) {
           <Text style={styles.mainDescription}>
             Cek ketersediaan stok obat akurat dan temukan rute bebas banjir terdekat dalam satu ketukan.
           </Text>
+
+          {/* Sisi Edukasi Kesehatan & Smart City */}
+          <View style={styles.eduHighlightPill}>
+            <Ionicons name="shield-checkmark" size={14} color={colors.primary} />
+            <Text style={styles.eduHighlightText}>
+              Edukasi Triase Darurat Medis & Integrasi Smart City Banjir
+            </Text>
+          </View>
         </View>
 
         {/* Bottom Action Area */}
@@ -142,6 +150,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     paddingHorizontal: 8,
+  },
+  eduHighlightPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F9F4',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 18,
+    gap: 6,
+  },
+  eduHighlightText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primary,
   },
   bottomSection: {
     paddingBottom: 24,

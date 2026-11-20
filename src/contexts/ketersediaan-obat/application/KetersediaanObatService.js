@@ -49,6 +49,42 @@ class KetersediaanObatService {
     };
   }
 
+  /**
+   * Mengambil daftar obat dan kuantitas stok yang tersedia di faskes ini
+   * Agar warga bisa melihat apotek mana punya obat apa dan berapa jumlahnya
+   */
+  getSummaryObatTersedia(faskesId) {
+    const defaultStok = {
+      faskes_1: [
+        { id: 'obat_1', nama: 'Paracetamol Sirup 120mg', jumlah: 45, satuan: 'botol', status: 'Ada' },
+        { id: 'obat_2', nama: 'Paracetamol 500mg', jumlah: 80, satuan: 'strip', status: 'Ada' },
+        { id: 'obat_3', nama: 'Oralit 200ml', jumlah: 35, satuan: 'sachet', status: 'Ada' },
+        { id: 'obat_5', nama: 'Cetirizine 10mg', jumlah: 24, satuan: 'strip', status: 'Ada' },
+      ],
+      faskes_2: [
+        { id: 'obat_1', nama: 'Paracetamol Sirup 120mg', jumlah: 0, satuan: 'botol', status: 'Habis' },
+        { id: 'obat_2', nama: 'Paracetamol 500mg', jumlah: 60, satuan: 'tablet', status: 'Ada' },
+        { id: 'obat_3', nama: 'Oralit 200ml', jumlah: 50, satuan: 'sachet', status: 'Ada' },
+        { id: 'obat_6', nama: 'Antasida Doen', jumlah: 30, satuan: 'strip', status: 'Ada' },
+      ],
+      faskes_3: [
+        { id: 'obat_1', nama: 'Paracetamol Sirup 120mg', jumlah: 30, satuan: 'botol', status: 'Ada' },
+        { id: 'obat_2', nama: 'Paracetamol 500mg', jumlah: 120, satuan: 'tablet', status: 'Ada' },
+        { id: 'obat_3', nama: 'Oralit 200ml', jumlah: 70, satuan: 'sachet', status: 'Ada' },
+      ],
+      faskes_4: [
+        { id: 'obat_1', nama: 'Paracetamol Sirup 120mg', jumlah: 15, satuan: 'botol', status: 'Ada' },
+        { id: 'obat_2', nama: 'Paracetamol 500mg', jumlah: 40, satuan: 'strip', status: 'Ada' },
+        { id: 'obat_3', nama: 'Oralit 200ml', jumlah: 20, satuan: 'sachet', status: 'Ada' },
+      ],
+    };
+
+    return defaultStok[faskesId] || [
+      { id: 'obat_1', nama: 'Paracetamol Sirup', jumlah: 25, satuan: 'botol', status: 'Ada' },
+      { id: 'obat_3', nama: 'Oralit Sachet', jumlah: 20, satuan: 'sachet', status: 'Ada' },
+    ];
+  }
+
   getAllStokForFaskes(faskesId) {
     return this.katalog.map(obat => {
       const stokInfo = this.getStokFaskes(faskesId, obat.id);

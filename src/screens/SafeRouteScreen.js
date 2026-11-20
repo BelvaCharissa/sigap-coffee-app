@@ -85,6 +85,24 @@ export default function SafeRouteScreen({ route, navigation }) {
       </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+        {/* Smart City Sensor & Traffic Live Hub */}
+        <View style={styles.smartCityBox}>
+          <View style={styles.smartCityHeader}>
+            <Ionicons name="hardware-chip-outline" size={13} color={colors.primary} />
+            <Text style={styles.smartCityHeaderText}>INTEGRASI SMART CITY BANDUNG • SENSOR IOT</Text>
+          </View>
+          <View style={styles.sensorRow}>
+            <View style={styles.sensorItemAlert}>
+              <Ionicons name="warning" size={13} color={colors.highlightRed} />
+              <Text style={styles.sensorItemAlertText}>Sensor Simpang Dago: 28 cm Genangan (Dihindari)</Text>
+            </View>
+            <View style={styles.sensorItemSafe}>
+              <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
+              <Text style={styles.sensorItemSafeText}>Jalur Cisitu Atas: Aman & Kering</Text>
+            </View>
+          </View>
+        </View>
+
         {/* Map Visual Card matching reference */}
         <View style={styles.mapContainer}>
           <View style={styles.mapMockupCanvas}>
@@ -565,9 +583,66 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#0288D1',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  smartCityBox: {
+    marginHorizontal: 18,
+    marginTop: 6,
+    marginBottom: 10,
+    backgroundColor: '#F2F9F4',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    borderRadius: 16,
+    padding: 12,
+  },
+  smartCityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  smartCityHeaderText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.primary,
+    letterSpacing: 0.5,
+  },
+  sensorRow: {
+    gap: 4,
+  },
+  sensorItemAlert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.highlightRedBg,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.highlightRedBorder,
+  },
+  sensorItemAlertText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.highlightRed,
+  },
+  sensorItemSafe: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+  },
+  sensorItemSafeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primary,
   },
   reportHazardBtn: {
     flexDirection: 'row',
