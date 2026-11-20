@@ -49,6 +49,11 @@ class KetersediaanObatService {
     };
   }
 
+  // Alias untuk kompatibilitas tampilan getStok
+  getStok(faskesId, obatId) {
+    return this.getStokFaskes(faskesId, obatId);
+  }
+
   /**
    * Mengambil daftar obat dan kuantitas stok yang tersedia di faskes ini
    * Agar warga bisa melihat apotek mana punya obat apa dan berapa jumlahnya

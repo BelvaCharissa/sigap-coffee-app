@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
+import { useAuth } from '../contexts/akun-mitra/application/AuthContext';
 import { direktoriFaskesService } from '../contexts/direktori-faskes/application/DirektoriFaskesService';
 import { ketersediaanObatService } from '../contexts/ketersediaan-obat/application/KetersediaanObatService';
 import FaskesCard from '../components/FaskesCard';
@@ -20,6 +21,7 @@ import ModalTambahFaskes from '../components/ModalTambahFaskes';
 const categories = ['Semua', 'Apotek', 'Klinik', 'Puskesmas', 'Rumah Sakit'];
 
 export default function FaskesDirectoryScreen({ navigation }) {
+  const { currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [katalogObat, setKatalogObat] = useState(ketersediaanObatService.getKatalog());
@@ -50,14 +52,16 @@ export default function FaskesDirectoryScreen({ navigation }) {
           <Text style={styles.title}>Direktori & Stok Faskes</Text>
           <Text style={styles.subTitle}>Cari apotek & faskes yang sedia obatmu</Text>
         </View>
-        <TouchableOpacity
-          style={styles.addBtn}
-          onPress={() => setModalTambahVisible(true)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={18} color="#FFFFFF" />
-          <Text style={styles.addBtnText}>Tambah Faskes</Text>
-        </TouchableOpacity>
+        {currentUser?.role === 'Admin' ? (
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => setModalTambahVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={18} color="#FFFFFF" />
+            <Text style={styles.addBtnText}>Tambah Faskes</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {/* Search Input */}
