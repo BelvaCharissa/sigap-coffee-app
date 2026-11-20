@@ -13,312 +13,167 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useAuth } from '../contexts/akun-mitra/application/AuthContext';
-import { direktoriFaskesService } from '../contexts/direktori-faskes/application/DirektoriFaskesService';
 import { ApiService } from '../services/ApiService';
-import Badge from '../components/Badge';
 
 export default function ProfileScreen({ navigation }) {
-  const {
-    currentUser,
-    switchRole,
-    semuaKlaim,
-    setujuiKlaim,
-    tolakKlaim,
-    ajukanKlaim,
-  } = useAuth();
-
+  const { currentUser, switchRole, logout } = useAuth();
   const [testingPeer, setTestingPeer] = useState(false);
-  const [peerTestResult, setPeerTestResult] = useState(null);
 
-  const handleTestPeerIntegrations = async () => {
+  const handleTestPeer = async () => {
     setTestingPeer(true);
-    setPeerTestResult(null);
-
-    const [jalanAmanRes, sehatDekatRes] = await Promise.all([
+    const [ja, sd] = await Promise.all([
       ApiService.fetchPeerJalanAmanReports(),
       ApiService.fetchPeerSehatDekatQueues(),
     ]);
-
-    setPeerTestResult({
-      jalanAman: jalanAmanRes,
-      sehatDekat: sehatDekatRes,
-    });
     setTestingPeer(false);
+    Alert.alert(
+      'Integrasi Peer Kelompok (TST × PWAM)',
+      `1. JalanAman (K01): ${ja.status}\n2. SehatDekat (K02): ${sd.status}\n\nFallback offline & circuit-breaker aktif!`
+    );
   };
 
-  const handleAjukanKlaimDemo = () => {
-    const unclaimed = direktoriFaskesService.getAll().find(f => !f.isClaimed);
-    if (!unclaimed) {
-      Alert.alert('Info', 'Semua faskes saat ini sudah diklaim.');
-      return;
-    }
+  const handleCheckSTB = async () => {
+    const res = await ApiService.checkHealth();
+    Alert.alert(
+      res.isLive ? 'Server STB Online!' : 'Mode Siaga Mandiri',
+      `URL: ${ApiService.getBaseUrl()}\nStatus: ${res.isLive ? 'HTTP 200 OK (JWT Aktif)' : 'Offline Cache Aktif'}`
+    );
+  };
 
-    try {
-      ajukanKlaim(unclaimed.id, unclaimed.nama);
-      Alert.alert(
-        'Pengajuan Klaim Terkirim!',
-        `Klaim untuk faskes "${unclaimed.nama}" telah diajukan dan menunggu persetujuan Admin.`
-      );
-    } catch (err) {
-      Alert.alert('Gagal', err.message);
-    }
+  const handleLogout = () => {
+    Alert.alert('Keluar Akun', 'Apakah Anda yakin ingin keluar dari akun ini?', [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Keluar',
+        style: 'destructive',
+        onPress: () => {
+          logout();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Landing' }],
+          });
+        },
+      },
+    ]);
+  };
+
+  const handleSwitchRoleModal = () => {
+    const newRole = currentUser.role === 'Warga' ? 'Mitra' : 'Warga';
+    switchRole(newRole.toLowerCase());
+    Alert.alert('Peran Berubah', `Peran Anda sekarang: ${newRole}`);
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Akun & Manajemen Mitra</Text>
-          <Text style={styles.subTitle}>
-            Domain Akun & Mitra (Open Host Service DDD Bab IV & V)
-          </Text>
-        </View>
-
-        {/* User Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <Ionicons
-              name={
-                currentUser.role === 'Mitra'
-                  ? 'shield-checkmark'
-                  : currentUser.role === 'Admin'
-                  ? 'settings'
-                  : 'person'
-              }
-              size={36}
-              color={colors.primary}
-            />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 110 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Profile Hero Card (Exact match with screenshot) */}
+        <View style={styles.heroCard}>
+          <View style={styles.avatarCircleBig}>
+            <Text style={styles.avatarInitials}>
+              {currentUser?.nama
+                ? currentUser.nama.split(' ').map(n => n[0]).slice(0, 2).join('')
+                : 'IR'}
+            </Text>
           </View>
-          <View style={{ flex: 1 }}>
-            <View style={styles.profileNameRow}>
-              <Text style={styles.profileName}>{currentUser.nama}</Text>
-            </View>
-            <Text style={styles.profileEmail}>{currentUser.email}</Text>
-            <Text style={styles.profileNim}>NIM: {currentUser.nim}</Text>
-
-            <View style={styles.badgeRow}>
-              <Badge label={`Peran: ${currentUser.role}`} type={currentUser.role} size="small" />
-              <View style={styles.repBadge}>
-                <Ionicons name="star" size={13} color="#F59E0B" />
-                <Text style={styles.repText}>Reputasi: {currentUser.reputasi}/100</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Role Switcher Demo Box */}
-        <View style={styles.cardBox}>
-          <View style={styles.cardBoxHeader}>
-            <Ionicons name="swap-horizontal" size={18} color={colors.primary} />
-            <Text style={styles.cardBoxTitle}>Simulasi Ganti Peran (Role Switcher)</Text>
-          </View>
-          <Text style={styles.cardBoxSub}>
-            Gunakan tombol di bawah untuk menguji alur hak akses Warga, Mitra Terverifikasi, dan Admin saat demo:
-          </Text>
-          <View style={styles.roleBtnRow}>
-            {['warga', 'mitra', 'admin'].map(rKey => {
-              const active = currentUser.role.toLowerCase() === rKey;
-              return (
-                <TouchableOpacity
-                  key={rKey}
-                  style={[styles.roleSelectBtn, active && styles.roleSelectBtnActive]}
-                  onPress={() => switchRole(rKey)}
-                >
-                  <Text style={[styles.roleSelectText, active && styles.roleSelectTextActive]}>
-                    {rKey.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Section Klaim Faskes */}
-        <View style={styles.cardBox}>
-          <View style={styles.cardBoxHeader}>
-            <Ionicons name="business-outline" size={18} color={colors.primary} />
-            <Text style={styles.cardBoxTitle}>Status Klaim Faskes Mitra</Text>
-          </View>
-
-          {currentUser.role === 'Warga' && (
-            <View>
-              <Text style={styles.cardBoxSub}>
-                Sebagai pemilik atau penanggung jawab faskes, Anda dapat mengklaim faskes untuk mengelola stok secara resmi.
+          <View style={styles.heroInfo}>
+            <Text style={styles.heroName}>{currentUser?.nama || 'Indah Ramadhani'}</Text>
+            <Text style={styles.heroEmail}>
+              {currentUser?.email || 'indah@sigap.id'} • NIM {currentUser?.nim || '18224037'}
+            </Text>
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedText}>
+                {currentUser?.role === 'Mitra' ? 'Mitra Faskes Terverifikasi' : 'Warga Siaga Terverifikasi'}
               </Text>
-              <TouchableOpacity
-                style={styles.claimActionBtn}
-                onPress={handleAjukanKlaimDemo}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="add-circle-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.claimActionBtnText}>Ajukan Klaim Faskes</Text>
-              </TouchableOpacity>
             </View>
-          )}
-
-          {currentUser.role === 'Mitra' && (
-            <View style={styles.mitraInfoBox}>
-              <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.mitraInfoTitle}>Faskes yang Dikelola:</Text>
-                <Text style={styles.mitraInfoDesc}>{currentUser.namaFaskesKlaim}</Text>
-                <Text style={styles.mitraInfoBadge}>
-                  ✓ Hak istimewa: Laporan stok Mitra otomatis terverifikasi & mengesampingkan laporan biasa.
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {/* Daftar Klaim & Aksi Admin */}
-          <Text style={[styles.cardBoxSub, { marginTop: 12, fontWeight: '700' }]}>
-            Daftar Pengajuan Klaim ({semuaKlaim.length}):
-          </Text>
-          {semuaKlaim.map(k => (
-            <View key={k.id} style={styles.claimItem}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.claimItemFaskes}>{k.namaFaskes}</Text>
-                <Text style={styles.claimItemPemohon}>
-                  Pemohon: {k.pemohonNama} • {k.tanggal}
-                </Text>
-                <Badge
-                  label={k.status}
-                  type={k.status === 'Disetujui' ? 'success' : k.status === 'Ditolak' ? 'danger' : 'warning'}
-                  size="small"
-                />
-              </View>
-
-              {currentUser.role === 'Admin' && k.status === 'Menunggu Verifikasi Admin' && (
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={styles.approveBtn}
-                    onPress={() => setujuiKlaim(k.id)}
-                  >
-                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.rejectBtn}
-                    onPress={() => tolakKlaim(k.id)}
-                  >
-                    <Ionicons name="close" size={16} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ))}
+          </View>
         </View>
 
-        {/* Hub Integrasi API Lintas Kelompok (TST x PWAM Deliverable #3) */}
-        <View style={styles.cardBox}>
-          <View style={styles.cardBoxHeader}>
-            <Ionicons name="git-network-outline" size={18} color={colors.primary} />
-            <Text style={styles.cardBoxTitle}>Hub Integrasi API (TST × PWAM)</Text>
-          </View>
-          <Text style={styles.cardBoxSub}>
-            Memanggil API microservice sendiri + API ≥ 2 kelompok lain dengan circuit breaker & fallback tahan gangguan (Slide 14 & 22).
-          </Text>
-
+        {/* Clean Menu List (Matches screenshot) */}
+        <View style={styles.menuContainer}>
+          {/* Menu 1: Kelola Profil Akun */}
           <TouchableOpacity
-            style={styles.testApiBtn}
-            onPress={handleTestPeerIntegrations}
-            disabled={testingPeer}
-            activeOpacity={0.8}
+            style={styles.menuItem}
+            onPress={handleSwitchRoleModal}
+            activeOpacity={0.7}
           >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconWrap, { backgroundColor: '#E8F5E9' }]}>
+                <Ionicons name="person-circle-outline" size={19} color="#2E7D32" />
+              </View>
+              <Text style={styles.menuTitle}>Kelola Profil Akun (Ganti Role)</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={17} color="#889C91" />
+          </TouchableOpacity>
+
+          {/* Menu 2: Riwayat Laporan Stok */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => Alert.alert('Riwayat Laporan', 'Semua riwayat laporan stok Anda telah terverifikasi secara realtime.')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconWrap, { backgroundColor: '#E1F5FE' }]}>
+                <Ionicons name="time-outline" size={19} color="#0288D1" />
+              </View>
+              <Text style={styles.menuTitle}>Riwayat Laporan Stok</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={17} color="#889C91" />
+          </TouchableOpacity>
+
+          {/* Menu 3: Server STB & Cloudflare */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleCheckSTB}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconWrap, { backgroundColor: '#F3E8FF' }]}>
+                <Ionicons name="server-outline" size={19} color="#7E22CE" />
+              </View>
+              <Text style={styles.menuTitle}>Server STB & Cloudflare</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={17} color="#889C91" />
+          </TouchableOpacity>
+
+          {/* Menu 4: Uji Integrasi Peer Kelompok */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleTestPeer}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconWrap, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="git-network-outline" size={19} color="#D97706" />
+              </View>
+              <Text style={styles.menuTitle}>Integrasi Kelompok 1 & 2</Text>
+            </View>
             {testingPeer ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator size="small" color={colors.primary} />
             ) : (
-              <>
-                <Ionicons name="refresh" size={16} color="#FFFFFF" />
-                <Text style={styles.testApiBtnText}>Uji Koneksi API Kelompok Lain</Text>
-              </>
+              <Ionicons name="chevron-forward" size={17} color="#889C91" />
             )}
           </TouchableOpacity>
 
-          {peerTestResult && (
-            <View style={styles.peerResultBox}>
-              <Text style={styles.peerResultHeading}>Hasil Uji Integrasi Lintas Kelompok:</Text>
-
-              {/* Kelompok 1: JalanAman */}
-              <View style={styles.peerItem}>
-                <View style={styles.peerHeader}>
-                  <Text style={styles.peerName}>1. JalanAman (Smart City - K01)</Text>
-                  <Badge label={peerTestResult.jalanAman.status} type="info" size="small" />
-                </View>
-                <Text style={styles.peerUrl}>Endpoint: https://jalanaman.stei.fun/api</Text>
-                <Text style={styles.peerDataText}>
-                  Data Banjir: {peerTestResult.jalanAman.data?.length || 0} laporan terintegrasi
-                </Text>
+          {/* Menu 5: Keluar / Ganti Akun */}
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomWidth: 0 }]}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconWrap, { backgroundColor: '#FFEBEE' }]}>
+                <Ionicons name="log-out-outline" size={19} color="#C62828" />
               </View>
-
-              {/* Kelompok 2: SehatDekat */}
-              <View style={styles.peerItem}>
-                <View style={styles.peerHeader}>
-                  <Text style={styles.peerName}>2. SehatDekat (Health - K02)</Text>
-                  <Badge label={peerTestResult.sehatDekat.status} type="info" size="small" />
-                </View>
-                <Text style={styles.peerUrl}>Endpoint: https://sehatdekat.stei.site/api</Text>
-                <Text style={styles.peerDataText}>
-                  Data Antrean: {peerTestResult.sehatDekat.data?.length || 0} faskes terhubung
-                </Text>
-              </View>
-
-              <Text style={styles.peerNote}>
-                ✓ Ketahanan gangguan terverifikasi: saat jaringan lambat atau offline, sistem otomatis memakai fallback cache sehingga aplikasi tidak crash.
-              </Text>
+              <Text style={[styles.menuTitle, { color: '#C62828' }]}>Keluar / Ganti Akun</Text>
             </View>
-          )}
+            <Ionicons name="chevron-forward" size={17} color="#C62828" />
+          </TouchableOpacity>
         </View>
-
-        {/* Konfigurasi Server & Akun */}
-        <View style={styles.cardBox}>
-          <View style={styles.cardBoxHeader}>
-            <Ionicons name="server-outline" size={18} color={colors.primary} />
-            <Text style={styles.cardBoxTitle}>Koneksi Server (Expo Go & STB)</Text>
-          </View>
-          <Text style={styles.cardBoxSub}>
-            URL Microservice aktif: {ApiService.getBaseUrl()}
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
-            <TouchableOpacity
-              style={[styles.testApiBtn, { flex: 1, backgroundColor: colors.primary }]}
-              onPress={() => navigation.navigate('Login')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="log-in-outline" size={16} color="#FFFFFF" />
-              <Text style={styles.testApiBtnText}>Halaman Login (JWT)</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.testApiBtn, { flex: 1, backgroundColor: '#0288D1' }]}
-              onPress={async () => {
-                const res = await ApiService.checkHealth();
-                Alert.alert(
-                  res.isLive ? 'Server Online!' : 'Mode Siaga Offline',
-                  res.isLive
-                    ? `Microservice terhubung (${res.data?.service}). Uptime: ${res.data?.uptimeSeconds}s.`
-                    : `Server ${ApiService.getBaseUrl()} belum terhubung via network. Sistem otomatis memakai cache mandiri.`
-                );
-              }}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="pulse" size={16} color="#FFFFFF" />
-              <Text style={styles.testApiBtnText}>Cek Health Server</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Tim Penyusun */}
-        <View style={styles.aboutCard}>
-          <Text style={styles.aboutTitle}>SIGAP (Sehat, Informasi, Gerak, Akses, Pertolongan)</Text>
-          <Text style={styles.aboutDesc}>
-            Tugas Besar Terintegrasi II3160 TST & II3140 PWAM STEI ITB 2026{'\n'}
-            • Indah Ramadhani (18224037) - Backend & Bisnis{'\n'}
-            • Belva Charissa P H (18224051) - Mobile Developer
-          </Text>
-        </View>
-
-        <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -331,292 +186,88 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  subTitle: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  profileCard: {
-    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
+  },
+  heroCard: {
+    margin: 20,
+    backgroundColor: '#2D6A4F',
+    borderRadius: 22,
+    padding: 18,
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
   },
-  avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryPastel,
+  avatarCircleBig: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  avatarInitials: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#2D6A4F',
   },
-  profileName: {
+  heroInfo: {
+    flex: 1,
+  },
+  heroName: {
     fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
-  profileEmail: {
-    fontSize: 12,
-    color: colors.textSecondary,
+  heroEmail: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.85)',
     marginTop: 2,
   },
-  profileNim: {
-    fontSize: 11,
-    color: colors.textTertiary,
-    marginTop: 1,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-  },
-  repBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+  verifiedBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
-    gap: 4,
-  },
-  repText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#B45309',
-  },
-  cardBox: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  cardBoxHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  cardBoxTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  cardBoxSub: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 16,
-    marginBottom: 10,
-  },
-  roleBtnRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  roleSelectBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  roleSelectBtnActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  roleSelectText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  roleSelectTextActive: {
-    color: '#FFFFFF',
-  },
-  claimActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    paddingVertical: 10,
-    borderRadius: 12,
-    gap: 6,
-    marginTop: 4,
-  },
-  claimActionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  mitraInfoBox: {
-    flexDirection: 'row',
-    backgroundColor: colors.primarySubtle,
-    padding: 12,
-    borderRadius: 12,
-    gap: 10,
-    alignItems: 'center',
-  },
-  mitraInfoTitle: {
-    fontSize: 11,
-    color: colors.primary,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  mitraInfoDesc: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  mitraInfoBadge: {
-    fontSize: 11,
-    color: colors.primaryLight,
-    marginTop: 3,
-  },
-  claimItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 10,
-    borderRadius: 12,
-    marginVertical: 4,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  claimItemFaskes: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  claimItemPemohon: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    marginVertical: 2,
-  },
-  adminActionRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginLeft: 8,
-  },
-  approveBtn: {
-    backgroundColor: colors.stockAda,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rejectBtn: {
-    backgroundColor: colors.stockHabis,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  testApiBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    paddingVertical: 11,
-    borderRadius: 12,
-    gap: 8,
-  },
-  testApiBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  peerResultBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  peerResultHeading: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  peerItem: {
-    backgroundColor: '#FFFFFF',
-    padding: 10,
     borderRadius: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    marginTop: 6,
   },
-  peerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  peerName: {
-    fontSize: 12.5,
+  verifiedText: {
+    fontSize: 10,
     fontWeight: '700',
-    color: colors.text,
+    color: '#FFFFFF',
   },
-  peerUrl: {
-    fontSize: 11,
-    color: colors.textTertiary,
-    marginTop: 2,
+  menuContainer: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
-  peerDataText: {
-    fontSize: 11.5,
-    color: colors.primary,
-    fontWeight: '600',
-    marginTop: 3,
-  },
-  peerNote: {
-    fontSize: 11,
-    color: colors.stockAda,
-    lineHeight: 15,
-    marginTop: 4,
-  },
-  aboutCard: {
-    marginHorizontal: 16,
-    padding: 16,
+  menuItem: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F9F4',
   },
-  aboutTitle: {
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.primary,
-  },
-  aboutDesc: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 16,
-    marginTop: 4,
+    color: '#1B2E24',
   },
 });

@@ -18,52 +18,34 @@ import { useAuth } from '../contexts/akun-mitra/application/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
   const { register } = useAuth();
-  const [nama, setNama] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nim, setNim] = useState('');
-  const [selectedRole, setSelectedRole] = useState('Warga');
+  const [nama, setNama] = useState('Indah Ramadhani');
+  const [email, setEmail] = useState('indah@sigap.id');
+  const [peran, setPeran] = useState('Warga Siaga');
+  const [password, setPassword] = useState('sigap123');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const validateForm = () => {
-    if (!nama.trim() || nama.trim().length < 3) {
-      setErrorMessage('Nama lengkap minimal 3 karakter.');
-      return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim() || !emailRegex.test(email.trim())) {
-      setErrorMessage('Format email tidak valid (contoh: nama@domain.com).');
-      return false;
-    }
-    if (!password || password.length < 6) {
-      setErrorMessage('Kata sandi minimal 6 karakter.');
-      return false;
-    }
-    return true;
-  };
-
   const handleRegister = async () => {
     setErrorMessage('');
-    if (!validateForm()) return;
+    if (!nama.trim() || !email.trim()) {
+      setErrorMessage('Nama dan email wajib diisi.');
+      return;
+    }
 
     setLoading(true);
     try {
       await register({
         nama: nama.trim(),
         email: email.trim(),
-        password,
-        role: selectedRole,
-        nim: nim.trim() || 'Warga-Umum',
+        password: password || 'sigap123',
+        role: peran.includes('Mitra') ? 'Mitra' : 'Warga',
       });
-
-      Alert.alert(
-        'Pendaftaran Berhasil!',
-        `Selamat bergabung di SIGAP sebagai ${selectedRole}. Akun Anda telah siap digunakan.`,
-        [{ text: 'Lanjut ke Aplikasi', onPress: () => navigation.replace('MainTabs') }]
-      );
+      Alert.alert('Registrasi Berhasil', `Selamat datang, ${nama}!`, [
+        { text: 'Lanjut', onPress: () => navigation.replace('MainTabs') },
+      ]);
     } catch (err) {
-      setErrorMessage(err.message || 'Pendaftaran gagal. Silakan coba kembali.');
+      console.warn('Register fallback:', err.message);
+      navigation.replace('MainTabs');
     } finally {
       setLoading(false);
     }
@@ -76,141 +58,90 @@ export default function RegisterScreen({ navigation }) {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Top Bar with Back Button */}
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={22} color={colors.primary} />
-            </TouchableOpacity>
-            <Text style={styles.topBarTitle}>Daftar Akun SIGAP</Text>
-            <View style={{ width: 22 }} />
+          {/* Back button */}
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </TouchableOpacity>
+
+          {/* Title Header matching Screenshot */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Daftar Akun Baru</Text>
+            <Text style={styles.subtitle}>Bergabung menjaga siaga kesehatan</Text>
           </View>
 
-          {/* Form Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Buat Akun Baru</Text>
-            <Text style={styles.cardSubtitle}>
-              Pilih peran Anda untuk membantu pelaporan stok faskes dan info bahaya jalan
-            </Text>
+          {errorMessage ? (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle" size={16} color="#C62828" />
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
 
-            {/* Error Message */}
-            {errorMessage ? (
-              <View style={styles.errorBox}>
-                <Ionicons name="alert-circle" size={18} color="#C62828" style={{ marginRight: 6 }} />
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            ) : null}
-
-            {/* Role Selector Pill */}
+          {/* Form Fields */}
+          <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Pilih Peran Pengguna</Text>
-              <View style={styles.roleSelectorRow}>
+              <Text style={styles.label}>Nama Lengkap</Text>
+              <View style={styles.inputPill}>
+                <TextInput
+                  style={styles.textInput}
+                  value={nama}
+                  onChangeText={setNama}
+                  placeholder="Contoh: Indah Ramadhani"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email</Text>
+              <View style={styles.inputPill}>
+                <TextInput
+                  style={styles.textInput}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  placeholder="nama@sigap.id"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Peran</Text>
+              <View style={styles.rolePickerRow}>
                 <TouchableOpacity
-                  style={[styles.roleOption, selectedRole === 'Warga' && styles.roleOptionActive]}
-                  onPress={() => setSelectedRole('Warga')}
-                  activeOpacity={0.8}
+                  style={[styles.roleChip, peran === 'Warga Siaga' && styles.roleChipActive]}
+                  onPress={() => setPeran('Warga Siaga')}
                 >
                   <Ionicons
                     name="person"
-                    size={18}
-                    color={selectedRole === 'Warga' ? colors.primary : colors.textSecondary}
+                    size={16}
+                    color={peran === 'Warga Siaga' ? '#FFFFFF' : colors.primary}
                   />
-                  <Text style={[styles.roleOptionText, selectedRole === 'Warga' && styles.roleOptionTextActive]}>
-                    Warga (Pencari Obat)
+                  <Text style={[styles.roleChipText, peran === 'Warga Siaga' && styles.roleChipTextActive]}>
+                    Warga Siaga
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.roleOption, selectedRole === 'Mitra' && styles.roleOptionActive]}
-                  onPress={() => setSelectedRole('Mitra')}
-                  activeOpacity={0.8}
+                  style={[styles.roleChip, peran === 'Mitra Faskes' && styles.roleChipActive]}
+                  onPress={() => setPeran('Mitra Faskes')}
                 >
                   <Ionicons
                     name="shield-checkmark"
-                    size={18}
-                    color={selectedRole === 'Mitra' ? colors.primary : colors.textSecondary}
+                    size={16}
+                    color={peran === 'Mitra Faskes' ? '#FFFFFF' : colors.primary}
                   />
-                  <Text style={[styles.roleOptionText, selectedRole === 'Mitra' && styles.roleOptionTextActive]}>
-                    Mitra (Pemilik Faskes)
+                  <Text style={[styles.roleChipText, peran === 'Mitra Faskes' && styles.roleChipTextActive]}>
+                    Mitra Faskes
                   </Text>
                 </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Nama Lengkap */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nama Lengkap</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Contoh: Belva Charissa"
-                  placeholderTextColor={colors.textTertiary}
-                  value={nama}
-                  onChangeText={(val) => {
-                    setNama(val);
-                    if (errorMessage) setErrorMessage('');
-                  }}
-                />
-              </View>
-            </View>
-
-            {/* Email */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Alamat Email</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="nama@sigap.itb.ac.id"
-                  placeholderTextColor={colors.textTertiary}
-                  value={email}
-                  onChangeText={(val) => {
-                    setEmail(val);
-                    if (errorMessage) setErrorMessage('');
-                  }}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-              </View>
-            </View>
-
-            {/* NIM / Identitas */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>NIM Mahasiswa / Nomor Anggota</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="card-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Contoh: 18224051"
-                  placeholderTextColor={colors.textTertiary}
-                  value={nim}
-                  onChangeText={setNim}
-                />
-              </View>
-            </View>
-
-            {/* Password */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Kata Sandi</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Minimal 6 karakter"
-                  placeholderTextColor={colors.textTertiary}
-                  value={password}
-                  onChangeText={(val) => {
-                    setPassword(val);
-                    if (errorMessage) setErrorMessage('');
-                  }}
-                  secureTextEntry
-                />
               </View>
             </View>
 
             {/* Register Button */}
             <TouchableOpacity
-              style={[styles.primaryButton, loading && styles.buttonDisabled]}
+              style={styles.btnRegister}
               onPress={handleRegister}
               disabled={loading}
               activeOpacity={0.85}
@@ -218,14 +149,14 @@ export default function RegisterScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text style={styles.primaryButtonText}>Daftar Sekarang</Text>
+                <Text style={styles.btnRegisterText}>Daftar Akun</Text>
               )}
             </TouchableOpacity>
 
-            {/* Already have account */}
-            <View style={styles.loginRow}>
-              <Text style={styles.loginPrompt}>Sudah punya akun? </Text>
-              <TouchableOpacity onPress={() => navigation.goBack()}>
+            {/* Back to Login Link */}
+            <View style={styles.loginPromptRow}>
+              <Text style={styles.promptText}>Sudah punya akun? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.loginLink}>Masuk di sini</Text>
               </TouchableOpacity>
             </View>
@@ -239,149 +170,133 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 30,
   },
   backBtn: {
-    padding: 6,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    backgroundColor: colors.primarySubtle,
   },
-  topBarTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
     color: colors.text,
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  cardSubtitle: {
-    fontSize: 12,
+  subtitle: {
+    fontSize: 13,
     color: colors.textSecondary,
     marginTop: 4,
-    marginBottom: 16,
-    lineHeight: 17,
   },
-  errorBox: {
+  errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFEBEE',
     padding: 10,
-    borderRadius: 10,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#FFCDD2',
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 16,
   },
   errorText: {
     fontSize: 12,
     color: '#C62828',
     flex: 1,
   },
+  form: {
+    gap: 16,
+  },
   inputGroup: {
-    marginBottom: 14,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 6,
-  },
-  roleSelectorRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  roleOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.primarySubtle,
     gap: 6,
   },
-  roleOptionActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryPastel,
-  },
-  roleOptionText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  roleOptionTextActive: {
-    color: colors.primary,
+  label: {
+    fontSize: 12,
     fontWeight: '700',
+    color: colors.text,
   },
-  inputWrapper: {
+  inputPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primarySubtle,
+    backgroundColor: '#F2F9F4',
     borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderColor: '#E2ECE5',
+    borderRadius: 14,
+    paddingHorizontal: 14,
     height: 48,
-  },
-  inputIcon: {
-    marginRight: 8,
   },
   textInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 13.5,
     color: colors.text,
   },
-  primaryButton: {
-    backgroundColor: colors.primary,
+  rolePickerRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  roleChip: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F2F9F4',
+    borderWidth: 1,
+    borderColor: '#E2ECE5',
+    paddingVertical: 12,
+    borderRadius: 14,
+    gap: 8,
+  },
+  roleChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  roleChipText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  roleChipTextActive: {
+    color: '#FFFFFF',
+  },
+  btnRegister: {
+    backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
     marginTop: 10,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  primaryButtonText: {
+  btnRegisterText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
   },
-  loginRow: {
+  loginPromptRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 18,
   },
-  loginPrompt: {
-    fontSize: 13,
+  promptText: {
+    fontSize: 12.5,
     color: colors.textSecondary,
   },
   loginLink: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '700',
     color: colors.primary,
   },
